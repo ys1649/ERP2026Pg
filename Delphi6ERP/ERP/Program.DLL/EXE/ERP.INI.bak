@@ -1,0 +1,1 @@
+Provider=SQLOLEDB.1;Password=erp;Persist Security Info=True;User ID=erp;Initial Catalog=erp_xt1;Data Source=ys3\sqlexpress

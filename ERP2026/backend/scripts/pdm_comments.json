@@ -1,0 +1,406 @@
+{
+  "TBL_CUSTOMER": {
+    "name": "客戶主檔",
+    "columns": {
+      "CUM_NO": "客戶編號",
+      "CUM_NAME": "客戶名稱",
+      "CUM_PRESIDENT": "負責人",
+      "CUM_CONTANT": "聯絡人",
+      "CUM_CONT_TITLE": "聯絡人職稱",
+      "CUM_TEL1": "電話1",
+      "CUM_TEL2": "電話2",
+      "CUM_FAX": "傳真",
+      "CUM_UNIFORM_NO": "統一編號",
+      "CUM_INV_ADDR": "發票地址",
+      "CUM_ADDR": "公司地址",
+      "CUM_ZIP_CODE": "郵遞區號",
+      "CUM_ADVANCE_AMOUNT": "預收款餘額",
+      "CUM_DESC": "說明",
+      "CUM_CREATOR": "建檔人員",
+      "CUM_ACNT_AR": "應收帳款科目",
+      "CUM_ACNT_ADVANCE": "預收款科目",
+      "CUM_INV_RATE": "發票比率"
+    }
+  },
+  "TBL_PRODUCT": {
+    "name": "產品主檔",
+    "columns": {
+      "PRD_NO": "產品編號",
+      "PRD_NAME": "產品名稱",
+      "PRD_UNIT": "單位",
+      "PRD_SALE_PRICE": "建議售價",
+      "PRD_SAFE_QTY": "安全存量",
+      "PRD_ONHAND": "全部庫存現有數量",
+      "PRD_CUR_COST": "現行成本",
+      "PRD_DESC": "說明",
+      "PRD_IS_DUMMY": "是否為虛擬料品",
+      "PRD_DUM_COST_RATE": "虛擬料品成本比率",
+      "PRD_EXT_COST_RATIO": "額外管銷成本比率(家具業)",
+      "PRD_CREATOR": "建檔人員"
+    }
+  },
+  "TBL_SUPPLIER": {
+    "name": "供應商主檔",
+    "columns": {
+      "SUP_NO": "廠商編號",
+      "SUP_NAME": "廠商名稱",
+      "SUP_PRESIDENT": "負責人",
+      "SUP_CONTANT": "聯絡人",
+      "SUP_CONT_TITLE": "聯絡人職稱",
+      "SUP_TEL1": "電話1",
+      "SUP_TEL2": "電話2",
+      "SUP_FAX": "傳真",
+      "SUP_UNIFORM_NO": "統一編號",
+      "SUP_INV_ADDR": "發票地址",
+      "SUP_ADDR": "公司地址",
+      "SUP_ZIP_CODE": "郵遞區號",
+      "SUP_ADVANCE_AMOUNT": "預付款餘額",
+      "SUP_DESC": "說明",
+      "SUP_CREATOR": "建檔人員",
+      "SUP_ACNT_AP": "應付帳款科目",
+      "SUP_ACNT_ADVANCE": "預付款科目"
+    }
+  },
+  "TBL_EMPLOYE": {
+    "name": "員工主檔",
+    "columns": {
+      "EPY_NO": "員工編號",
+      "EPY_NAME": "員工姓名",
+      "EPY_PASSWORD": "密碼",
+      "EPY_TEL1": "電話1",
+      "EPY_TEL2": "電話2",
+      "EPY_ADDR": "住址",
+      "EPY_IS_CAN_LOGIN": "是否可登入系統",
+      "EPY_DESC": "說明",
+      "EPY_CREATOR": "建檔人員"
+    }
+  },
+  "TBL_SHIP": {
+    "name": "銷貨單主檔",
+    "columns": {
+      "SMT_NO": "銷貨單編號",
+      "CUM_NO": "客戶編號",
+      "EPY_NO": "業務員編號",
+      "CAR_NO": "車輛編號",
+      "JNL_NO": "會計單據編號",
+      "SMT_STATUS": "單據狀態",
+      "SMT_INV_NO": "發票號碼",
+      "SMT_DATE": "銷貨日期",
+      "SMT_DESTINATION": "送貨地址",
+      "SMT_TOTAL": "未稅合計",
+      "SMT_TAX": "稅額",
+      "SMT_NOT_CLEAN": "未收款",
+      "SMT_COST": "成本合計",
+      "SMT_DELIVER1": "送貨員1",
+      "SMT_DELIVER2": "送貨員2",
+      "SMT_DESC": "說明",
+      "SMT_CREATOR": "建檔人員",
+      "SMT_TR_FLAG": "傳輸記錄"
+    }
+  },
+  "TBL_SHIP_DT": {
+    "name": "銷貨單明細",
+    "columns": {
+      "SMT_NO": "銷貨單編號",
+      "SMD_SEQNO": "銷貨單序號",
+      "PRD_NO": "產品編號",
+      "INV_NO": "庫房編號",
+      "SMD_PRD_NAME": "品名",
+      "SMD_UNIT_PRICE": "單價",
+      "SMD_QTY": "數量",
+      "SMD_COST": "成本"
+    }
+  },
+  "TBL_PO_RECV": {
+    "name": "進貨單主檔",
+    "columns": {
+      "RCV_NO": "進貨單編號",
+      "SUP_NO": "廠商編號",
+      "JNL_NO": "會計單據編號",
+      "RCV_STATUS": "單據狀態",
+      "RCV_DATE": "進貨日期",
+      "RCV_INV_NO": "發票號碼",
+      "RCV_TOTAL": "未稅合計",
+      "RCV_TAX": "稅額",
+      "RCV_NOT_CLEAN": "未付款",
+      "RCV_DESC": "說明",
+      "RCV_CREATOR": "建檔人員",
+      "RCV_TR_FLAG": "傳輸記錄"
+    }
+  },
+  "TBL_PO_RECV_DT": {
+    "name": "進貨單明細",
+    "columns": {
+      "RCV_NO": "進貨單編號",
+      "RCD_SEQNO": "進貨單序號",
+      "PRD_NO": "產品編號",
+      "INV_NO": "庫房編號",
+      "RCD_PRD_NAME": "產品名稱",
+      "RCD_QTY": "數量",
+      "RCD_UNIT_PRICE": "單價"
+    }
+  },
+  "TBL_INVENTORY": {
+    "name": "庫房主檔",
+    "columns": {
+      "INV_NO": "庫房編號",
+      "INV_NAME": "庫房名稱",
+      "INV_DESC": "說明",
+      "INV_CREATOR": "建檔人員"
+    }
+  },
+  "TBL_INV_ONHAND": {
+    "name": "庫房現有量檔",
+    "columns": {
+      "INV_NO": "庫房編號",
+      "PRD_NO": "產品編號",
+      "IOH_QTY": "現有數量"
+    }
+  },
+  "TBL_TRANSACTION": {
+    "name": "庫房交易檔",
+    "columns": {
+      "TRN_ID": "交易內碼",
+      "PRD_NO": "產品編號",
+      "INV_NO": "庫房編號",
+      "TRN_TYPE": "交易類別",
+      "TRN_SRC_NO": "交易來源編號",
+      "TRN_SRC_SEQNO": "交易來源序號",
+      "TRN_DATETIME": "交易日期時間",
+      "TRN_QTY": "交易數量",
+      "TRN_COST": "交易成本",
+      "TRN_ONHAND": "存貨數量",
+      "TRN_AVG_COST": "移動平均成本"
+    }
+  },
+  "TBL_AR_RECV": {
+    "name": "收款單主檔",
+    "columns": {
+      "ARR_NO": "收款單編號",
+      "CUM_NO": "客戶編號",
+      "JNL_NO": "會計單據編號",
+      "ARR_DATE": "收款日期",
+      "ARR_CASH": "收取現金",
+      "ARR_CHECK": "收取票據",
+      "ARR_FROM_ADVANCE": "取用預收款",
+      "ARR_TO_ADVANCE": "累入預收款",
+      "ARR_DESC": "說明",
+      "ARR_CREATOR": "建檔人員",
+      "ARR_TR_FLAG": "傳輸記錄"
+    }
+  },
+  "TBL_AR_RECV_DT": {
+    "name": "收款單明細",
+    "columns": {
+      "ARR_NO": "收款單編號",
+      "ARD_SEQNO": "序號",
+      "SMT_NO": "銷貨單編號",
+      "ARD_AMOUNT": "沖帳金額",
+      "ARD_DISCOUNT": "折讓金額"
+    }
+  },
+  "TBL_AP_PAY": {
+    "name": "付款單主檔",
+    "columns": {
+      "PAY_NO": "付款單編號",
+      "SUP_NO": "廠商編號",
+      "JNL_NO": "會計單據編號",
+      "PAY_DATE": "付款單日期",
+      "PAY_CASH": "付出現金",
+      "PAY_CHECK": "付出票據",
+      "PAY_FROM_ADVANCE": "取用預付款",
+      "PAY_TO_ADVANCE": "累入預付款",
+      "PAY_DESC": "說明",
+      "PAY_CREATOR": "建檔人員",
+      "PAY_TR_FLAG": "傳輸記錄"
+    }
+  },
+  "TBL_AP_PAY_DT": {
+    "name": "付款單明細",
+    "columns": {
+      "PAY_NO": "付款單編號",
+      "PAD_SEQNO": "序號",
+      "RCV_NO": "進貨單編號",
+      "PAD_AMOUNT": "沖帳金額",
+      "PAD_DISCOUNT": "折讓金額"
+    }
+  },
+  "TBL_SYS_PARAM": {
+    "name": "系統參數",
+    "columns": {
+      "SPR_PERIOD_START": "成本期間起始日期",
+      "SPR_COR_NAME": "公司名稱",
+      "SPR_TEL": "電話",
+      "SPR_FAX": "傳真",
+      "SPR_ADDR": "地址",
+      "SPR_TAX_RATE": "稅率",
+      "SPR_QTY_DECIMAL": "數量顯示小數點",
+      "SPR_AMOUNT_UNIT_DOT": "金額單價顯示小數點",
+      "SPR_AMOUNT_DOT": "金額顯示小數點",
+      "SPR_BKUP_CMD": "系統備份指令",
+      "SPR_BKUP_PARA": "系統備份參數",
+      "SPR_BKUP_PATH": "系統備份路徑",
+      "SPR_PRD_COST_RATE": "產品管銷成本預設值(傢俱)",
+      "SPR_BONUS_SALE_RATE": "業績獎金比率(傢俱)",
+      "SPR_BONUS_PROFIT_RATE": "利潤獎金比率(傢俱)",
+      "SPR_ACNT_YEAR": "會計年度",
+      "SPR_ACNT_SALE_REVENUE": "銷貨收入科目",
+      "SPR_ACNT_SALE_RETURN": "銷貨退回科目",
+      "SPR_ACNT_SALE_DISCOUNT": "銷貨折讓科目",
+      "SPR_ACNT_SALE_TAX": "銷項稅額",
+      "SPR_ACNT_PURCHASE": "進貨科目",
+      "SPR_ACNT_PUR_DISCOUNT": "進貨折讓科目",
+      "SPR_ACNT_PUR_RETURN": "進貨退出科目",
+      "SPR_ACNT_PUR_TAX": "進項稅額",
+      "SPR_ACNT_CASH": "現金科目",
+      "SPR_ACNT_CUS_CHECK": "應收票據",
+      "SPR_ACNT_SUP_CHECK": "應付票據"
+    }
+  },
+  "TBL_INV_ADJ": {
+    "name": "庫房調整單",
+    "columns": {
+      "ADJ_NO": "調整單編號",
+      "ADJ_STATUS": "單據狀態",
+      "ADJ_DATE": "調整日期",
+      "ADJ_DESC": "說明",
+      "ADJ_CREATOR": "建檔人員",
+      "ADJ_TR_FLAG": "傳輸記錄"
+    }
+  },
+  "TBL_INV_ADJ_DT": {
+    "name": "庫房調整單明細",
+    "columns": {
+      "ADJ_NO": "調整單編號",
+      "ADD_SEQNO": "序號",
+      "PRD_NO": "產品編號",
+      "ADD_QTY": "數量",
+      "ADD_COST": "成本",
+      "INV_NO": "庫房編號"
+    }
+  },
+  "TBL_HIS_SHIP": {
+    "name": "歷史銷貨單主檔",
+    "columns": {
+      "HSMT_NO": "憑證編號",
+      "CUM_NO": "客戶編號",
+      "EPY_NO": "業務員編號",
+      "HSMT_INV_NO": "發票號碼",
+      "HSMT_DATE": "銷貨日期",
+      "HSMT_DESTINATION": "送貨地址",
+      "HSMT_TOTAL": "未稅合計",
+      "HSMT_TAX": "稅額",
+      "HSMT_COST": "成本合計",
+      "HSMT_DESC": "說明",
+      "HSMT_CREATOR": "建檔人員"
+    }
+  },
+  "TBL_HIS_SHIP_DT": {
+    "name": "歷史銷貨單明細",
+    "columns": {
+      "HSMT_NO": "憑證編號",
+      "HSMD_SEQNO": "銷貨單序號",
+      "PRD_NO": "產品編號",
+      "INV_NO": "庫房編號",
+      "HSMD_PRD_NAME": "品名",
+      "HSMD_UNIT_PRICE": "單價",
+      "HSMD_QTY": "數量",
+      "HSMD_COST": "成本"
+    }
+  },
+  "TBL_HIS_PO_RECV": {
+    "name": "歷史進貨單主檔",
+    "columns": {
+      "HRCV_NO": "進貨單編號",
+      "SUP_NO": "廠商編號",
+      "HRCV_DATE": "進貨日期",
+      "HRCV_INV_NO": "發票號碼",
+      "HRCV_TOTAL": "未稅合計",
+      "HRCV_TAX": "稅額",
+      "HRCV_DESC": "說明",
+      "HRCV_CREATOR": "建檔人員"
+    }
+  },
+  "TBL_HIS_PO_RECV_DT": {
+    "name": "歷史進貨單明細",
+    "columns": {
+      "HRCV_NO": "進貨單編號",
+      "HRCD_SEQNO": "進貨單序號",
+      "PRD_NO": "產品編號",
+      "INV_NO": "庫房編號",
+      "HRCD_PRD_NAME": "產品名稱",
+      "HRCD_QTY": "數量",
+      "HRCD_UNIT_PRICE": "單價"
+    }
+  },
+  "TBL_ACNT_ACCOUNT": {
+    "name": "會計科目主檔",
+    "columns": {
+      "ACT_NO": "科目編號",
+      "TYP_NO": "類別編號",
+      "ACT_NAME": "科目名稱",
+      "ACT_CATEGORY_REVERSE": "類別_立沖科目",
+      "ACT_CATEGORY_CASH": "類別_現金流量科目科目",
+      "ACT_CREATOR": "建檔人員",
+      "ACT_DESC": "說明"
+    }
+  },
+  "TBL_ACNT_TYPE": {
+    "name": "科目類別主檔",
+    "columns": {
+      "TYP_NO": "類別編號",
+      "TYP_NAME": "類別名稱",
+      "TYP_MAJOR_TYPE": "主類別名稱",
+      "TYPE_DESC": "說明"
+    }
+  },
+  "TBL_ACNT_JOURNAL": {
+    "name": "分錄主檔",
+    "columns": {
+      "JNL_NO": "單據編號",
+      "JNL_DATE": "單據日期",
+      "JNL_DESC": "備註",
+      "JNL_BILL_TYPE": "單據類別",
+      "JNL_CREATOR": "建檔人員"
+    }
+  },
+  "TBL_ACNT_JOURNAL_DT": {
+    "name": "分錄明細",
+    "columns": {
+      "JNL_NO": "單據編號",
+      "JND_SEQNO": "單據序號",
+      "ACT_NO": "科目編號",
+      "JND_AMOUNT": "金額",
+      "JND_DESC": "摘要"
+    }
+  },
+  "TBL_ACNT_INIT": {
+    "name": "科目年度期初值",
+    "columns": {
+      "INI_YEAR": "西元年度",
+      "ACT_NO": "科目編號",
+      "INI_AMOUNT": "期初金額"
+    }
+  },
+  "TBL_FLD_FOR_EDIT": {
+    "name": "TBL_FLD_FOR_EDIT",
+    "columns": {
+      "FLD_DUMMY_PK": "FLD_DUMMY_PK",
+      "FLD_STRING": "FLD_STRING",
+      "FLD_INT": "FLD_INT",
+      "FLD_BOOLEAN": "FLD_BOOLEAN",
+      "FLD_FLOAT": "FLD_FLOAT"
+    }
+  },
+  "TBL_CAR": {
+    "name": "車輛主檔",
+    "columns": {
+      "CAR_NO": "車輛編號",
+      "CAR_BRAND": "廠牌形式",
+      "CAR_LICENSE_NO": "牌照號碼",
+      "CAR_DATE1": "出廠年月",
+      "CAR_CREATOR": "建檔人員",
+      "CAR_DESC": "說明"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+2004/12/05:
+	1: Data_Restore:增加 Restore 會計模組相關 Table:TBL_ACNT_TYPE,TBL_ACNT_ACCOUNT,TBL_ACNT_INIT,TBL_ACNT_JOURNAL,TBL_ACNT_JOURNAL_DT
+
+	2.for 巨昌家具2005/01/01 啟用會計模組, 編寫:				
+		EMPTY_JOURNAL_通實.Bat: 清除通實 2005/01/01 前的所有會計單據 
+		EMPTY_JOURNAL_京廣.Bat: 清除京廣 2005/01/01 前的所有會計單據
+		EMPTY_JOURNAL.sql--> SQL COMMAND FILE
+
+

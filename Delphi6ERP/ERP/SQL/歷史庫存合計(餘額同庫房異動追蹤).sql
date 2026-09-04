@@ -1,0 +1,18 @@
+SELECT SUM(A.TRN_ONHAND*A.TRN_AVG_COST) AMOUNT
+FROM 	TBL_TRANSACTION A 
+INNER JOIN 	(	SELECT A.PRD_NO
+										,TRN_CNT
+										,MAX(TRN_ID) TRN_ID
+										,count(*) LastTime_TrnCount
+							FROM TBL_TRANSACTION A
+							INNER JOIN(	SELECT A.PRD_NO
+																,MAX(A.TRN_DATETIME) TRN_DATETIME
+																,COUNT(*) TRN_CNT
+													FROM TBL_TRANSACTION A
+													WHERE A.TRN_DATETIME <'6/26/2006'
+													GROUP BY A.PRD_NO
+												) B ON 	A.PRD_NO=B.PRD_NO
+														AND A.TRN_DATETIME=B.TRN_DATETIME
+							GROUP BY A.PRD_NO,b.trn_cnt
+						) B ON A.TRN_ID=B.TRN_ID				
+WHERE A.TRN_ONHAND<>0

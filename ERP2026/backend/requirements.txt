@@ -1,0 +1,6 @@
+fastapi==0.141.1
+uvicorn==0.32.0
+pydantic==2.13.4
+psycopg[binary]==3.3.5
+pymssql==2.4.0  # 僅 backend/scripts/migrate_mssql_to_pg.py 這支一次性搬移工具用到
+python-multipart==0.0.12

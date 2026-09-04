@@ -1,0 +1,20 @@
+object FORM_ERP: TFORM_ERP
+  Left = 630
+  Top = 281
+  Width = 397
+  Height = 137
+  Caption = 'FORM_ERP'
+  Color = clBtnFace
+  Font.Charset = ANSI_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -15
+  Font.Name = #32048#26126#39636
+  Font.Style = []
+  FormStyle = fsMDIChild
+  OldCreateOrder = False
+  Position = poDefault
+  Scaled = False
+  Visible = True
+  PixelsPerInch = 96
+  TextHeight = 15
+end

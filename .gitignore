@@ -1,7 +1,8 @@
-# Delphi6ERP 跟 ERP2026 各自是獨立的 git repo（分開開發、分開推送），
-# 這裡刻意排除，不要巢狀 tracking 進這層的 repo
-/Delphi6ERP/
-/ERP2026/
+# Delphi6ERP/ 跟 ERP2026/ 原本各自是獨立 git repo，合併進這層統一管控時
+# 把它們的 .git 資料夾改名保留（沒有真的刪除，只是不再是獨立 repo），
+# 這裡排除掉不要被當成一般檔案加進來
+Delphi6ERP/.git.bak/
+ERP2026/.git.bak/
 
 # OS
 Thumbs.db

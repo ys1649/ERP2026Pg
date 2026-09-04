@@ -1,0 +1,23 @@
+# Delphi 編譯產物（可由原始碼重新編譯出來，不需版控）
+*.dcu
+*.dcp
+*.exe
+*.dll
+*.bpl
+*.map
+*.drc
+
+# 上面 *.dll 規則在 Windows 下大小寫不敏感，會誤傷同名資料夾，這裡救回來
+!ERP/Program.DLL/
+!SysReport.DLL/
+
+# Delphi IDE 自動備份檔（開檔存檔時自動產生）
+*.~*
+
+# Delphi IDE 專案狀態/暫存（機器/使用者相關，非原始碼）
+*.dsk
+*.ddp
+*.local
+*.identcache
+__history/
+__recovery/

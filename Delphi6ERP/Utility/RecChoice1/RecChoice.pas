@@ -1,0 +1,302 @@
+unit RecChoice;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  ExtCtrls, Grids, DBGrids, StdCtrls,db,DbTables, Mask, DBCtrls;
+
+type
+  TfrmRecChoice = class(TForm)
+    DBGrid1: TDBGrid;
+    Panel1: TPanel;
+    DataSource1: TDataSource;
+    Panel2: TPanel;
+    Label1: TLabel;
+    procedure DBGrid1KeyPress(Sender: TObject; var Key: Char);
+    procedure DBGrid1KeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+  private
+    MultiSelect:Boolean;
+    KeyField:string;
+    MarkList:TStringList;
+    ResultField:string;
+    procedure AddList(s:string);
+    procedure DelList(s:string);
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+  TWRecChoice=class(TComponent)
+  private
+    fm:TFrmRecChoice;
+    procedure GetChoiceList;
+    function GetHeight: integer;
+    function GetKeyField: string;
+    function GetLeft: integer;
+    function GetTop: integer;
+    function GetWidth: integer;
+    procedure SetDataSet(const Value: TDataset);
+    procedure SetHeight(const Value: integer);
+    procedure SetKeyField(const Value: string);
+    procedure SetLeft(const Value: integer);
+    procedure SetTop(const Value: integer);
+    procedure SetWidth(const Value: integer);
+    function GetMultiSelect: Boolean;
+    procedure SetMultiSelect(const Value: Boolean);
+    function GetList: TStringList;
+    function GetResultField: string;
+    procedure SetResultField(const Value: string);
+  public
+    constructor Create(AOwner: TComponent);override;
+    destructor Destroy;override;
+    property ResultField:string
+            read GetResultField write SetResultField;
+    property DataSet:TDataset Write SetDataSet;
+    property top:integer Read GetTop Write SetTop;
+    property Left:integer Read GetLeft write SetLeft;
+    property Height:integer Read GetHeight write SetHeight;
+    property Width:integer Read GetWidth write SetWidth;
+    property KeyField:string Read GetKeyField write SetKeyField;
+    property MultiSelect:Boolean Read GetMultiSelect write SetMultiSelect;
+    property SelList:TStringList Read GetList;
+    function Excute:Boolean;
+    procedure AddColunm(Field,Title:string;Colwidth:integer);
+    procedure ClearColunm;
+
+  end;
+
+{$R *.DFM}
+implementation
+
+procedure TfrmRecChoice.DBGrid1KeyPress(Sender: TObject; var Key: Char);
+var s:string;
+begin
+	s:=label1.caption;
+ case key of
+    #33..#255:
+    	s:=s+key;
+    ^H:
+     	Delete(s,(length(s)),1);
+ end;
+ label1.caption:=s;
+ DataSource1.DataSet.Locate(KeyField,s,[LoPartialKey]);
+end;
+
+
+{ TWRecChoice }
+
+procedure TWRecChoice.AddColunm(Field,Title: string; Colwidth: integer);
+var DBCol:Tcolumn;
+begin
+	DBCol:=fm.DBGrid1.Columns.Add;
+  DBCol.FieldName:=Field;
+  if title='' then
+  	DBCol.Title.Caption:=Field
+  else
+  	DBCol.Title.Caption:=Title;
+    
+  DBCOL.Width:=ColWidth;
+end;
+
+procedure TWRecChoice.ClearColunm;
+begin
+	fm.DBGrid1.Columns.Clear;
+end;
+
+constructor TWRecChoice.Create;
+begin
+	fm:=TfrmRecChoice.Create(Application);
+  fm.Height:=400;
+  fm.Width:=350;
+  fm.MultiSelect:=False;
+  fm.Label1.Caption:='';
+  fm.MarkList:=TStringList.Create;
+end;
+
+destructor TWRecChoice.Destroy;
+begin
+  fm.MarkList.Free;
+  fm.Free;
+end;
+
+function TWRecChoice.Excute: Boolean;
+var WasActive:Boolean;
+begin
+  WasActive:=fm.DataSource1.DataSet.active;
+  if not fm.DataSource1.DataSet.active then
+    fm.DataSource1.DataSet.active:=True;
+	if fm.ShowModal=mrOK then begin
+  	GetChoiceList;
+  	result:=true;
+  end else
+  	result:=false;
+  fm.DataSource1.DataSet.active:=WasActive;
+end;
+
+procedure TWRecChoice.GetChoiceList;
+begin
+	if (not MultiSelect) or (fm.DBGrid1.SelectedRows.Count=0) then //至少傳回一個,才不會導致空陣列
+    fm.AddList(fm.DbGrid1.DataSource.DataSet.fieldbyName(ResultField).asstring);
+end;
+
+function TWRecChoice.GetHeight: integer;
+begin
+	result:=fm.Height;
+end;
+
+function TWRecChoice.GetKeyField: string;
+begin
+	result:=fm.KeyField;
+end;
+
+function TWRecChoice.GetLeft: integer;
+begin
+	result:=fm.Left;
+end;
+
+function TWRecChoice.GetList: TStringList;
+begin
+  result:=fm.MarkList;
+end;
+
+function TWRecChoice.GetMultiSelect: Boolean;
+begin
+	result:=fm.MultiSelect;
+end;
+
+function TWRecChoice.GetResultField: string;
+begin
+  result:=fm.ResultField;
+end;
+
+function TWRecChoice.GetTop: integer;
+begin
+	result:=fm.Top;
+end;
+
+function TWRecChoice.GetWidth: integer;
+begin
+	result:=fm.Width;
+end;
+
+procedure TWRecChoice.SetDataSet(const Value: TDataset);
+begin
+	fm.DataSource1.DataSet:=value;
+end;
+
+procedure TWRecChoice.SetHeight(const Value: integer);
+begin
+	fm.Height:=value;
+end;
+
+procedure TWRecChoice.SetKeyField(const Value: string);
+begin
+	fm.KeyField:=value;
+end;
+
+procedure TWRecChoice.SetLeft(const Value: integer);
+begin
+	fm.Left:=value;
+end;
+
+procedure TWRecChoice.SetMultiSelect(const Value: Boolean);
+begin
+	fm.MultiSelect:=Value;
+end;
+
+procedure TWRecChoice.SetResultField(const Value: string);
+begin
+  fm.ResultField:=value;
+end;
+
+procedure TWRecChoice.SetTop(const Value: integer);
+begin
+	fm.top:=value;
+end;
+
+procedure TWRecChoice.SetWidth(const Value: integer);
+begin
+	fm.Width:=value;
+end;
+
+procedure TfrmRecChoice.DBGrid1KeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+var dset:TDataset;
+    mark:boolean;
+    s:string;
+begin
+	dset:=DataSource1.DataSet;
+	case key of
+  VK_Return:
+  	Begin
+    	key:=0;
+    	ModalResult:=mrOk;
+	  end;
+  VK_Escape:
+  	Begin
+    	key:=0;
+  		ModalResult:=mrCancel;
+	  end;
+  VK_Space:
+  	begin
+    	key:=0;
+      Label1.Caption:='';
+      if MultiSelect then begin
+        s:=DbGrid1.DataSource.DataSet.fieldbyName(ResultField).asstring;
+        mark:=DbGrid1.SelectedRows.CurrentRowSelected;
+		    DbGrid1.SelectedRows.CurrentRowSelected:= not mark;
+        mark:=DbGrid1.SelectedRows.CurrentRowSelected;
+        if mark then
+          AddList(s)
+        else
+          DelList(s);
+      end;
+	  end;
+  VK_UP:
+  	begin
+    	key:=0;
+	    dset.Prior;
+	  end;
+  VK_Down:
+  	begin
+    	key:=0;
+	    dset.Next;
+    end;
+  VK_Home:
+  	begin
+	    key:=0;
+    	dset.first;
+  	end;
+  VK_END:
+  	begin
+    	key:=0;
+    	dset.Last;
+	  end;
+  VK_Prior:
+  	begin
+    	key:=0;
+    	dset.MoveBy(-10);
+	  end;
+  VK_Next:
+  	begin
+    	key:=0;
+    	dset.MoveBy(10);
+	  end;
+  end;
+end;
+
+procedure TfrmRecChoice.AddList(s: string);
+begin
+  MarkList.Add(s);
+end;
+
+procedure TfrmRecChoice.DelList(s: string);
+var n:integer;
+begin
+  n:=MarkList.IndexOf(s);
+  MarkList.Delete(n);
+end;
+
+end.

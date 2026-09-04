@@ -1,0 +1,3802 @@
+/BEGIN_TABLE AMCHEAD
+NAME A30
+VERS A8
+USER A30
+/BEGIN_DATA AMCHEAD
+PowerDesigner/PDM
+6.1.0
+
+/END_TABLE AMCHEAD
+
+/BEGIN_TABLE AMCMODL
+@       N5
+OID     N8
+MODL    N8
+NAME    A80
+CODE    A80
+LABL    A254
+DESC    TXT
+NOTE    TXT
+OPTS    TXT
+EXOP    TXT
+DBMS    A256
+FILE    A256
+HEAD    TXT
+FOOT    TXT
+POID    N8
+PNAM    A80
+PCOD    A80
+USER    A80
+VERS    A8
+CDAT    N12
+MDAT    N12
+EDAT    N12
+PART    N1
+ACCS    N5
+CUST    TXT
+/BEGIN_DATA AMCMODL
+2
+111
+111
+SysReport
+SYSREPORT
+
+
+
+
+
+Microsoft Access 95 & 97
+access95.def
+
+
+101
+SysReport
+SYSREPORT
+ADMIN
+
+1029431352
+1033165349
+1029431354
+0
+0
+
+/END_TABLE AMCMODL
+
+/BEGIN_TABLE AMCDOMN
+@       N5
+OID     N8
+DOMN    N8
+NAME    A80
+CODE    A80
+DESC    TXT
+NOTE    TXT
+LABL    A254
+DTTP    A30
+MLEN    N8
+PREC    N2
+IDNT    N1
+WDEF    N1
+MAND    N1
+UNIT    A8
+FRMT    A20
+LVAL    A20
+HVAL    A20
+DVAL    A30
+UPPR    N1
+LOWR    N1
+NMDF    N1
+VALS    TXT
+CRUL    TXT
+GRUL    TXT
+SOID    N8
+ATYP    N8
+PROF    N8
+ROPR    N1
+/BEGIN_DATA AMCDOMN
+0
+1691
+1691
+ID
+ID
+
+
+
+LongInteger
+0
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+1
+0
+0
+0
+0
+1692
+1692
+NAME
+NAME
+
+
+
+Text(80)
+80
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+2
+0
+0
+0
+0
+1693
+1693
+SCRIPT
+SCRIPT
+
+
+
+Memo
+4000
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+3
+0
+0
+0
+0
+1694
+1694
+IMAGE_FILE
+IMAGE_FILE
+
+
+
+OLE
+0
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+4
+0
+0
+0
+0
+1695
+1695
+IMAGE_GRAPHIC
+IMAGE_GRAPHIC
+
+
+
+OLE
+0
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+5
+0
+0
+0
+0
+1696
+1696
+DESC
+DESC
+
+
+
+Text(255)
+255
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+6
+0
+0
+0
+0
+1697
+1697
+CODE_NUMBER
+CODE_NUMBER
+
+
+
+Text(20)
+20
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+7
+0
+0
+0
+0
+1698
+1698
+boolean
+BOOLEAN
+
+
+
+YesNo
+0
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+8
+0
+0
+0
+0
+1699
+1699
+Data_Type
+DATA_TYPE
+
+
+
+Text(20)
+20
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+9
+0
+0
+0
+0
+1700
+1700
+DM_INTEGER
+DM_INTEGER
+
+
+
+LongInteger
+0
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+10
+0
+0
+0
+0
+1701
+1701
+DM_FLOAT
+DM_FLOAT
+
+
+
+Double
+0
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+11
+0
+0
+0
+0
+1702
+1702
+TEXT_SHORT
+TEXT_SHORT
+
+
+
+Text(20)
+20
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+12
+0
+0
+0
+0
+1703
+1703
+TEXT_LONG
+TEXT_LONG
+
+
+
+Text(255)
+255
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+13
+0
+0
+0
+/END_TABLE AMCDOMN
+
+/BEGIN_TABLE AMCTABL
+@       N5
+OID     N8
+TABL    N8
+MODL    N8
+NAME    A80
+CODE    A80
+LABL    A254
+DESC    TXT
+NOTE    TXT
+NBRC    N24,0
+SOID    N8
+TOBJ    N5
+COBJ    A80
+OPTS    TXT
+PKOP    TXT
+CRUL    TXT
+SRUL    TXT
+PKCN    A30
+CKCN    A30
+HEAD    TXT
+FOOT    TXT
+NGEN    N1
+OWNR    N8
+ATYP    N8
+TSTD    N8
+ROPR    N1
+/BEGIN_DATA AMCTABL
+2
+1704
+1704
+111
+系統報表主檔
+TBLSYSREPORT
+
+
+
+0
+14
+4
+TBLSYSREPORT
+
+
+
+
+
+
+
+
+0
+0
+0
+0
+0
+2
+1705
+1705
+111
+系統報表之查詢欄位
+TBLSYSREPORTFIELD
+
+
+
+0
+37
+4
+TBLSYSREPORTFIELD
+
+
+
+
+
+
+
+
+0
+0
+0
+0
+0
+/END_TABLE AMCTABL
+
+/BEGIN_TABLE AMCCOLN
+@       N5
+OID     N8
+COLN    N8
+NAME    A80
+CODE    A80
+LABL    A254
+DESC    TXT
+NOTE    TXT
+TABL    N8
+DOMN    N8
+DTTP    A30
+MLEN    N8
+PREC    N2
+IDNT    N1
+WDEF    N1
+UNIT    A8
+FRMT    A20
+LVAL    A20
+HVAL    A20
+DVAL    A30
+UPPR    N1
+LOWR    N1
+NMDF    N1
+VALS    TXT
+CRUL    TXT
+GRUL    TXT
+PRIM    N1
+FORN    N1
+MAND    N1
+DISP    N1
+SOID    N8
+TOBJ    N5
+COBJ    A80
+CKCN    A30
+NUMR    N8
+PROF    N8
+REDU    N8
+NULV    N5
+AVLN    N8
+ATYP    N8
+ROPR    N1
+/BEGIN_DATA AMCCOLN
+2
+1706
+1706
+報表_ID
+SRP_ID
+
+
+
+1704
+1691
+LongInteger
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+1
+0
+1
+1
+16
+8
+SRP_ID
+
+1
+0
+-100
+0
+0
+0
+0
+2
+1707
+1707
+報表代碼
+SRP_CODE
+
+
+
+1704
+1697
+Text(20)
+20
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+1
+1
+18
+8
+SRP_CODE
+
+2
+0
+-100
+0
+0
+0
+0
+2
+1708
+1708
+報表名稱
+SRP_NAME
+
+
+
+1704
+1692
+Text(80)
+80
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+1
+1
+20
+8
+SRP_NAME
+
+3
+0
+-100
+0
+0
+0
+0
+2
+1709
+1709
+報表說明
+SRP_DESCRIPTION
+
+
+
+1704
+1696
+Text(255)
+255
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+0
+1
+22
+8
+SRP_DESCRIPTION
+
+4
+0
+-100
+0
+0
+0
+0
+2
+1710
+1710
+SQL_SELECT敘述
+SRP_SELECT
+
+
+
+1704
+1693
+Memo
+4000
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+1
+1
+24
+8
+SRP_SQL
+
+5
+0
+-100
+0
+0
+0
+0
+2
+1711
+1711
+SQL_WHERE敘述
+SRP_WHERE
+
+
+
+1704
+1693
+Memo
+4000
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+0
+1
+26
+8
+SRP_WHERE
+
+6
+0
+-100
+0
+0
+0
+0
+2
+1712
+1712
+SQL_GROUP敘述
+SRP_GROUPBY
+
+
+
+1704
+1693
+Memo
+4000
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+0
+1
+28
+8
+SRP_GROUPBY
+
+7
+0
+-100
+0
+0
+0
+0
+2
+1713
+1713
+SQL_ORDER敘述
+SRP_ORDERBY
+
+
+
+1704
+1693
+Memo
+4000
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+0
+1
+30
+8
+SRP_ORDERBY
+
+8
+0
+-100
+0
+0
+0
+0
+2
+1714
+1714
+PreScript
+SRP_PRESCRIPT
+
+
+
+1704
+1693
+Memo
+4000
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+0
+1
+32
+8
+PRESCRIPT
+
+9
+0
+-100
+0
+0
+0
+0
+2
+1715
+1715
+Postscript
+SRP_POSTSCRIPT
+
+
+
+1704
+1693
+Memo
+4000
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+0
+1
+34
+8
+POST_SCRIPT
+
+10
+0
+-100
+0
+0
+0
+0
+2
+1716
+1716
+報表格式檔
+SRP_REPORTFILE
+
+
+
+1704
+1694
+OLE
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+0
+1
+36
+8
+SRP_REPORTFILE
+
+11
+0
+-100
+0
+0
+0
+0
+2
+1717
+1717
+報表_ID
+SRP_ID
+
+
+
+1705
+1691
+LongInteger
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+1
+1
+1
+1
+16
+8
+SRP_ID
+
+1
+0
+-100
+0
+0
+0
+0
+2
+1718
+1718
+序號
+SRF_SEQNO
+
+
+
+1705
+1691
+LongInteger
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+1
+0
+1
+1
+39
+8
+SRF_SEQNO
+
+2
+0
+-100
+0
+0
+0
+0
+2
+1719
+1719
+欄位名稱
+SRF_FIELDNAME
+
+
+
+1705
+1692
+Text(80)
+80
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+1
+1
+43
+8
+SRF_FIELDNAME
+
+3
+0
+-100
+0
+0
+0
+0
+2
+1720
+1720
+顯示名稱
+SRF_DISPNAME
+
+
+
+1705
+1692
+Text(80)
+80
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+1
+1
+45
+8
+SRF_NAME
+
+4
+0
+-100
+0
+0
+0
+0
+2
+1721
+1721
+表格別名
+SRF_TABLEALIAS
+
+
+
+1705
+1692
+Text(80)
+80
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+1
+1
+41
+8
+SRF_TABLEALIAS
+
+5
+0
+-100
+0
+0
+0
+0
+2
+1722
+1722
+出現順序
+SRF_DISPORDER
+
+
+
+1705
+1691
+LongInteger
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+1
+1
+53
+8
+SRF_ORDER
+
+6
+0
+-100
+0
+0
+0
+0
+2
+1723
+1723
+資料型態
+SRF_DATATYPE
+
+date\
+numberic\
+string
+
+1705
+1702
+Text(20)
+20
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+0
+1
+0
+0
+SRF_DATATYPE
+
+7
+0
+-100
+0
+0
+0
+0
+2
+1724
+1724
+控制項類別
+SRF_CONTROLTYPE
+
+有下列幾種數值:\
+EDIT\
+DATE\
+LISTITEM\
+SQL
+
+1705
+1702
+Text(20)
+20
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+1
+1
+49
+8
+SRF_CONTROLTYPE
+
+8
+0
+-100
+0
+0
+0
+0
+2
+1725
+1725
+查詢型態
+SRF_QUERYTYPE
+
+有三種\
+SINGLE\
+RANGE\
+MultiSelect
+
+1705
+1702
+Text(20)
+20
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+1
+1
+55
+8
+SRF_CRITERIARANGE
+
+9
+0
+-100
+0
+0
+0
+0
+2
+1726
+1726
+是否為必要條件
+SRF_ISMUSTCRITERIA
+
+
+
+1705
+1698
+YesNo
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+1
+1
+57
+8
+SRF_MUSTCRITERIA
+
+10
+0
+-100
+0
+0
+0
+0
+2
+1727
+1727
+是否為查詢條件
+SRF_ISWHERE
+
+
+
+1705
+1698
+YesNo
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+1
+1
+59
+8
+SRF_WHERE
+
+11
+0
+-100
+0
+0
+0
+0
+2
+1728
+1728
+是否為排序條件
+SRF_ISSORT
+
+
+
+1705
+1698
+YesNo
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+1
+1
+61
+8
+SRF_SORT
+
+12
+0
+-100
+0
+0
+0
+0
+3
+1741
+1741
+排序遞減
+SRF_SORTDEC
+
+
+
+1705
+1698
+YesNo
+0
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+0
+1
+0
+0
+SRF_SORTDEC
+
+13
+0
+-100
+0
+0
+0
+0
+2
+1729
+1729
+選項列表
+SRF_LIST_VALUE
+
+若 SRF_CONTROLTYPE ='LISTITEM'\
+則此欄位存放 LISTVALUE \
+ITEM 之間以 ',' 隔開
+
+1705
+1693
+Memo
+4000
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+0
+1
+63
+8
+SRF_LIST_VALUE
+
+14
+0
+-100
+0
+0
+0
+0
+2
+1730
+1730
+選項SQL
+SRF_LIST_SQL
+
+若 SRF_CONTROLTYPE ='SQL'\
+此欄位存放 SQL 敘述
+
+1705
+1693
+Memo
+4000
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+0
+1
+65
+8
+SRF_LIST_SQL
+
+15
+0
+-100
+0
+0
+0
+0
+2
+1731
+1731
+選項傳回欄位
+SRF_LIST_RETURNFIELD
+
+
+
+1705
+1692
+Text(80)
+80
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+0
+1
+51
+8
+SRF_RETURNFIELD
+
+16
+0
+-100
+0
+0
+0
+0
+2
+1732
+1732
+選項欄位顯示
+SRF_LIST_FIELDDISP
+
+若 SRF_CONTROLTYPE ='SQL'\
+此欄位存放 SELECT SQL SHOW 出的欄位名稱
+
+1705
+1693
+Memo
+4000
+0
+0
+0
+
+
+
+
+
+0
+0
+0
+
+
+
+0
+0
+0
+1
+67
+8
+SRF_LIST_FIELDDISP
+
+17
+0
+-100
+0
+0
+0
+0
+/END_TABLE AMCCOLN
+
+/BEGIN_TABLE AMCREFR
+@       N5
+OID     N8
+REFR    N8
+NAME    A80
+CODE    A80
+LABL    A254
+DESC    TXT
+NOTE    TXT
+TABL1   N8
+TABL2   N8
+URUL    N1
+DRUL    N1
+MAND    N1
+CPRT    N1
+SOID    N8
+TOBJ    N5
+COBJ    A80
+FKCN    A30
+CMIN    A10
+CMAX    A10
+NGEN    N1
+CMMT    N1
+ROPR    N1
+/BEGIN_DATA AMCREFR
+6
+1733
+1733
+Ref_1698
+REF_1698
+
+
+
+1704
+1705
+1
+1
+1
+1
+0
+0
+REF_1698
+
+0
+n
+0
+0
+0
+3
+1800
+1800
+Ref_1800
+REF_1800
+
+
+
+1704
+1705
+1
+1
+1
+1
+0
+0
+REF_1800
+
+0
+n
+0
+0
+0
+/END_TABLE AMCREFR
+
+/BEGIN_TABLE AMCCCOL
+@       N5
+OID     N8
+CCOL    N8
+COLN1   N8
+COLN2   N8
+/BEGIN_DATA AMCCCOL
+4
+1734
+1734
+1706
+1717
+1
+1801
+1801
+1706
+1717
+/END_TABLE AMCCCOL
+
+/BEGIN_TABLE AMCCREF
+@       N5
+OID     N8
+CREF    N8
+REFR    N8
+CCOL    N8
+NUMR    N8
+/BEGIN_DATA AMCCREF
+3
+1802
+1802
+1800
+1801
+1
+/END_TABLE AMCCREF
+
+/BEGIN_TABLE AMCAKEY
+@       N5
+OID     N8
+AKEY    N8
+NAME    A80
+CODE    A80
+TABL    N8
+LABL    A254
+DESC    TXT
+NOTE    TXT
+OPTS    TXT
+AKCN    A30
+NUMR    N8
+ROPR    N1
+/BEGIN_DATA AMCAKEY
+3
+1755
+1755
+SRP_CODE
+SRP_CODE
+1704
+
+
+
+
+
+1
+0
+/END_TABLE AMCAKEY
+
+/BEGIN_TABLE AMCCKEY
+@       N5
+OID     N8
+CKEY    N8
+AKEY    N8
+COLN    N8
+NUMR    N8
+/BEGIN_DATA AMCCKEY
+3
+1756
+1756
+1755
+1707
+1
+/END_TABLE AMCCKEY
+
+/BEGIN_TABLE AMCINDX
+@       N5
+OID     N8
+INDX    N8
+NAME    A80
+CODE    A80
+TABL    N8
+LABL    A254
+DESC    TXT
+NOTE    TXT
+PRIM    N1
+FORN    N1
+ISAK    N1
+KOBJ    N8
+UNIQ    N1
+CLUS    N1
+OPTS    TXT
+COBJ    A80
+NUMR    N8
+TYPE    A40
+ROPR    N1
+/BEGIN_DATA AMCINDX
+6
+1735
+1735
+TBLSYSREPORT_PK
+TBLSYSREPORT_PK
+1704
+
+
+
+1
+0
+0
+1704
+1
+0
+
+PK
+1
+
+0
+6
+1736
+1736
+TBLSYSREPORTFIELD_PK
+TBLSYSREPORTFIELD_PK
+1705
+
+
+
+1
+0
+0
+1705
+1
+0
+
+PK
+2
+
+0
+3
+1791
+1791
+TBLSYSREPORT_PK
+TBLSYSREPORT_PK
+1704
+
+
+
+1
+0
+0
+1704
+1
+0
+
+PK
+3
+
+0
+3
+1793
+1793
+SRP_CODE_AK
+SRP_CODE_AK
+1704
+
+
+
+0
+0
+1
+1755
+1
+0
+
+
+4
+
+0
+3
+1795
+1795
+TBLSYSREPORTFIELD_PK
+TBLSYSREPORTFIELD_PK
+1705
+
+
+
+1
+0
+0
+1705
+1
+0
+
+PK
+5
+
+0
+/END_TABLE AMCINDX
+
+/BEGIN_TABLE AMCCIDX
+@       N5
+OID     N8
+CIDX    N8
+INDX    N8
+COLN    N8
+ASCD    N1
+NUMR    N8
+/BEGIN_DATA AMCCIDX
+4
+1737
+1737
+1735
+1706
+1
+1
+4
+1738
+1738
+1736
+1717
+1
+1
+4
+1739
+1739
+1736
+1718
+1
+2
+3
+1792
+1792
+1791
+1706
+1
+1
+3
+1794
+1794
+1793
+1707
+1
+1
+3
+1796
+1796
+1795
+1717
+1
+1
+3
+1797
+1797
+1795
+1718
+1
+2
+/END_TABLE AMCCIDX
+
+/BEGIN_TABLE AMCTRGR
+@       N5
+TEMP    A30
+TEXT    TXT
+NAME    A30
+TABL    N8
+ALWS    N1
+/BEGIN_DATA AMCTRGR
+/END_TABLE AMCTRGR
+
+/BEGIN_TABLE AMCPROC
+@       N5
+OID     N8
+PROC    N8
+NAME    A80
+CODE    A80
+LABL    A254
+DESC    TXT
+NOTE    TXT
+TEXT    TXT
+FUNC    N1
+/BEGIN_DATA AMCPROC
+/END_TABLE AMCPROC
+
+/BEGIN_TABLE AMCVIEW
+@       N5
+OID     N8
+VIEW    N8
+NAME    A80
+CODE    A80
+LABL    A254
+DESC    TXT
+NOTE    TXT
+CUST    N1
+LOBJ    TXT
+QURY    TXT
+UPDT    N1
+GENE    N1
+CHCK    N1
+OWNR    N8
+ROPR    N1
+/BEGIN_DATA AMCVIEW
+/END_TABLE AMCVIEW
+
+/BEGIN_TABLE AMCRULE
+@       N5
+OID     N8
+RULE    N8
+NAME    A80
+CODE    A80
+LABL    A254
+DESC    TXT
+NOTE    TXT
+TYPE    N5
+FLAG    N5
+CEXP    TXT
+SEXP    TXT
+LOBJ    TXT
+SOID    N8
+COBJ    A80
+/BEGIN_DATA AMCRULE
+/END_TABLE AMCRULE
+
+/BEGIN_TABLE AMCTSPC
+@       N5
+OID     N8
+TSPC    N8
+NAME    A80
+CODE    A80
+LABL    A254
+DESC    TXT
+NOTE    TXT
+OPTS    TXT
+/BEGIN_DATA AMCTSPC
+/END_TABLE AMCTSPC
+
+/BEGIN_TABLE AMCSTOR
+@       N5
+OID     N8
+STOR    N8
+NAME    A80
+CODE    A80
+LABL    A254
+DESC    TXT
+NOTE    TXT
+OPTS    TXT
+/BEGIN_DATA AMCSTOR
+/END_TABLE AMCSTOR
+
+/BEGIN_TABLE AMCLTBL
+@       N5
+OID     N8
+LTBL    N8
+LABL    A254
+DESC    TXT
+NOTE    TXT
+OPTS    TXT
+HEAD    TXT
+FOOT    TXT
+GENE    N1
+TABL    N8
+OWNR    N8
+/BEGIN_DATA AMCLTBL
+/END_TABLE AMCLTBL
+
+/BEGIN_TABLE AMCLCOL
+@       N5
+OID     N8
+LCOL    N8
+NAME    A80
+CODE    A80
+LABL    A254
+DESC    TXT
+NOTE    TXT
+LTBL    N8
+COLN    N8
+DTTP    A30
+MLEN    N8
+PREC    N2
+MAND    N1
+UNIQ    N1
+DISP    N1
+IQIX    N4
+OPTFP   TXT
+OPTLF   TXT
+OPTLD   TXT
+OPTHG   TXT
+OPTHNG  TXT
+NUMR    N8
+/BEGIN_DATA AMCLCOL
+/END_TABLE AMCLCOL
+
+/BEGIN_TABLE AMCJREL
+@       N5
+OID     N8
+JREL    N8
+NAME    A80
+CODE    A80
+LABL    A254
+DESC    TXT
+NOTE    TXT
+LTBL1   N8
+LTBL2   N8
+MANY    N1
+/BEGIN_DATA AMCJREL
+/END_TABLE AMCJREL
+
+/BEGIN_TABLE AMCJIDX
+@       N5
+OID     N8
+JIDX    N8
+NAME    A80
+CODE    A80
+LABL    A254
+DESC    TXT
+NOTE    TXT
+OPTS    TXT
+HEAD    TXT
+FOOT    TXT
+LTBL    N8
+LOBJ    TXT
+OWNR    N8
+/BEGIN_DATA AMCJIDX
+/END_TABLE AMCJIDX
+
+/BEGIN_TABLE AMCJCCL
+@       N5
+OID     N8
+JCCL    N8
+LCOL1   N8
+LCOL2   N8
+/BEGIN_DATA AMCJCCL
+/END_TABLE AMCJCCL
+
+/BEGIN_TABLE AMCJCRL
+@       N5
+OID     N8
+JCRL    N8
+JREL    N8
+JCCL    N8
+NUMR    N8
+/BEGIN_DATA AMCJCRL
+/END_TABLE AMCJCRL
+
+/BEGIN_TABLE AMCFACT
+@       N5
+OID     N8
+FACT    N8
+NAME    A80
+CODE    A80
+LABL    A254
+DESC    TXT
+NOTE    TXT
+TABL    N8
+AGGR    TXT
+/BEGIN_DATA AMCFACT
+/END_TABLE AMCFACT
+
+/BEGIN_TABLE AMCDIM
+@       N5
+OID     N8
+DIM     N8
+NAME    A80
+CODE    A80
+LABL    A254
+DESC    TXT
+NOTE    TXT
+TABL    N8
+/BEGIN_DATA AMCDIM
+/END_TABLE AMCDIM
+
+/BEGIN_TABLE AMCHFCT
+@       N5
+OID     N8
+HFCT    N8
+NAME    A80
+CODE    A80
+LABL    A254
+DESC    TXT
+NOTE    TXT
+/BEGIN_DATA AMCHFCT
+/END_TABLE AMCHFCT
+
+/BEGIN_TABLE AMCHDIM
+@       N5
+OID     N8
+HDIM    N8
+NAME    A80
+CODE    A80
+LABL    A254
+DESC    TXT
+NOTE    TXT
+/BEGIN_DATA AMCHDIM
+/END_TABLE AMCHDIM
+
+/BEGIN_TABLE AMCMETR
+@       N5
+OID     N8
+METR    N8
+NAME    A80
+CODE    A80
+LABL    A254
+DESC    TXT
+NOTE    TXT
+TTYP    N8
+COLN    N8
+FRML    TXT
+AGGR    TXT
+/BEGIN_DATA AMCMETR
+/END_TABLE AMCMETR
+
+/BEGIN_TABLE AMCATTR
+@       N5
+OID     N8
+ATTR    N8
+NAME    A80
+CODE    A80
+LABL    A254
+DESC    TXT
+NOTE    TXT
+TTYP    N8
+COLN    N8
+/BEGIN_DATA AMCATTR
+/END_TABLE AMCATTR
+
+/BEGIN_TABLE AMCNODE
+@       N5
+OID     N8
+NODE    N8
+PNODE   N8
+TYPE    N8
+NUMR    N8
+GENE    N1
+/BEGIN_DATA AMCNODE
+/END_TABLE AMCNODE
+
+/BEGIN_TABLE AMCDTBS
+@       N5
+OID     N8
+DTBS    N8
+NAME    A80
+CODE    A80
+LABL    A254
+DESC    TXT
+NOTE    TXT
+DEFF    A256
+DTSC    A80
+SRVN    A30
+LOGN    A128
+PASS    A256
+/BEGIN_DATA AMCDTBS
+/END_TABLE AMCDTBS
+
+/BEGIN_TABLE AMCETBL
+@       N5
+OID     N8
+ETBL    N8
+NAME    A80
+CODE    A80
+LABL    A254
+DESC    TXT
+NOTE    TXT
+DTBS    N8
+/BEGIN_DATA AMCETBL
+/END_TABLE AMCETBL
+
+/BEGIN_TABLE AMCECOL
+@       N5
+OID     N8
+ECOL    N8
+NAME    A80
+CODE    A80
+LABL    A254
+DESC    TXT
+NOTE    TXT
+ETBL    N8
+DTTP    A30
+MLEN    N8
+PREC    N2
+DISP    N1
+NUMR    N8
+/BEGIN_DATA AMCECOL
+/END_TABLE AMCECOL
+
+/BEGIN_TABLE AMCTSRC
+@       N5
+OID     N8
+TSRC    N8
+TABL    N8
+DTBS    N8
+SCRPT   TXT
+INVLD   N1
+LOBJ    TXT
+/BEGIN_DATA AMCTSRC
+/END_TABLE AMCTSRC
+
+/BEGIN_TABLE AMCCSRC
+@       N5
+OID     N8
+CSRC    N8
+COLN    N8
+TSRC    N8
+ALIAS   A80
+EXPR    TXT
+INVLD   N1
+LOBJ    TXT
+/BEGIN_DATA AMCCSRC
+/END_TABLE AMCCSRC
+
+/BEGIN_TABLE AMCRPRT
+@       N5
+OID     N8
+RPRT    N8
+FLGS    N8
+NAME    A64
+DESC    A254
+TMLT    BIN
+/BEGIN_DATA AMCRPRT
+/END_TABLE AMCRPRT
+
+/BEGIN_TABLE AMCSLCT
+RPRT    N8
+MODL    N8
+LOBJ    TXT
+/BEGIN_DATA AMCSLCT
+/END_TABLE AMCSLCT
+
+/BEGIN_TABLE AMCCNST
+@       N5
+CNST    N8
+MODL    N8
+NAME    A30
+TYPE    A20
+VALE    A254
+RSRV    N1
+/BEGIN_DATA AMCCNST
+/END_TABLE AMCCNST
+
+/BEGIN_TABLE AMCEXAT
+@       N5
+EXAT    N8
+MODL    N8
+NAME    A30
+TYPE    A20
+LABL    A254
+VALE    A254
+TOBJ    N5
+RSRV    N1
+/BEGIN_DATA AMCEXAT
+3
+1
+111
+BOOLEAN_DEFAULT
+(Boolean)
+
+0
+35
+0
+1
+2
+111
+BOOLEAN_DEFAULT
+(Boolean)
+
+0
+41
+0
+/END_TABLE AMCEXAT
+
+/BEGIN_TABLE AMCEXAV
+@       N5
+EXAV    N8
+MODL    N8
+EXAT    N8
+VALE    A254
+OBJT    N8
+/BEGIN_DATA AMCEXAV
+/END_TABLE AMCEXAV
+
+/BEGIN_TABLE PBEDTS
+@       N5
+EDTN    N8
+NAME    A30
+EDIT    A254
+TYPE    N5
+CNTR    N8
+SEQN    N5
+FLAG    N12
+RSVD    A32
+/BEGIN_DATA PBEDTS
+/END_TABLE PBEDTS
+
+/BEGIN_TABLE PBFRMT
+@       N5
+FMTN    N8
+NAME    A30
+FRMT    A254
+TYPE    N5
+CNTR    N8
+GENE    N8
+/BEGIN_DATA PBFRMT
+/END_TABLE PBFRMT
+
+/BEGIN_TABLE PBVALD
+@       N5
+VLDN    N8
+NAME    A30
+VALD    A254
+TYPE    N5
+CNTR    N8
+VMSG    A254
+GENE    N8
+/BEGIN_DATA PBVALD
+/END_TABLE PBVALD
+
+/BEGIN_TABLE AMCREDO
+@       N5
+REDO    N8
+OPER    A20
+MODL    N8
+SUBM    N8
+OBJT    N5
+PRM1    A512
+PRM2    A512
+/BEGIN_DATA AMCREDO
+0
+1740
+DeleteColn
+111
+0
+35
+系統報表之查詢欄位,TBLSYSREPORTFIELD,資料形態,SRF_DATATYPE
+
+/END_TABLE AMCREDO
+
+/BEGIN_TABLE AMCFONT
+FONT    N5
+FNAM    A32
+FSIZ    N5
+FSTY    N5
+/BEGIN_DATA AMCFONT
+1
+Arial
+8
+0
+2
+Arial
+8
+1
+3
+MS Sans Serif
+8
+0
+4
+Arial
+8
+8
+5
+Arial
+6
+0
+/END_TABLE AMCFONT
+
+/BEGIN_TABLE AMCPENS
+PENS    N5
+PSTY    N5
+PCLR    N8
+PWID    N5
+/BEGIN_DATA AMCPENS
+1
+1
+0
+0
+2
+1
+255
+0
+3
+1
+4194368
+0
+4
+1
+255
+2
+/END_TABLE AMCPENS
+
+/BEGIN_TABLE AMCBRSH
+BRSH    N5
+BSTY    N5
+BCLR    N8
+BHAT    N5
+/BEGIN_DATA AMCBRSH
+1
+0
+16777215
+0
+2
+0
+32896
+0
+3
+0
+255
+0
+4
+0
+4227200
+0
+5
+0
+65535
+0
+6
+0
+0
+0
+/END_TABLE AMCBRSH
+
+/BEGIN_TABLE AMCPROP
+PROP    N5
+MODL    N8
+SUBM    N8
+SECT    A50
+NPRO    A30
+VPRO    A80
+/BEGIN_DATA AMCPROP
+0
+111
+0
+DataArchitect
+Shadow
+no
+1
+111
+0
+DataArchitect
+AutoAdjust
+yes
+2
+111
+0
+DataArchitect
+LineStyle
+2
+3
+111
+0
+DataArchitect
+PrnScale
+100
+4
+111
+0
+DataArchitect
+Orientation
+2
+5
+111
+0
+DataArchitect
+LengthName
+80
+6
+111
+0
+DataArchitect
+UpprCaseName
+no
+7
+111
+0
+DataArchitect
+LowrCaseName
+no
+8
+111
+0
+DataArchitect
+AllowAllName
+yes
+9
+111
+0
+DataArchitect
+AllowChrName
+<Null>
+10
+111
+0
+DataArchitect
+InvldChrName
+"+-*/\.,!:;"
+11
+111
+0
+DataArchitect
+NoAccentName
+no
+12
+111
+0
+DataArchitect
+LengthCode
+80
+13
+111
+0
+DataArchitect
+UpprCaseCode
+yes
+14
+111
+0
+DataArchitect
+LowrCaseCode
+no
+15
+111
+0
+DataArchitect
+AllowAllCode
+no
+16
+111
+0
+DataArchitect
+AllowChrCode
+'a'-'z', 'A'-'Z', '0'-'9', "_"
+17
+111
+0
+DataArchitect
+InvldChrCode
+<Null>
+18
+111
+0
+DataArchitect
+NoAccentCode
+yes
+19
+111
+0
+DataArchitect
+NoSplitting
+yes
+20
+111
+0
+DataArchitect
+Truncation
+no
+21
+111
+0
+DataArchitect
+Wrapping
+no
+22
+111
+0
+DataArchitect
+WrapLength
+80
+23
+111
+0
+DataArchitect
+WrapChar
+" !""#$%&'()*+,-./:;<=>?@[\]^_`{|}~"
+24
+111
+0
+DataArchitect
+PdmShowName
+yes
+25
+111
+0
+DataArchitect
+PdmShowPrim
+yes
+26
+111
+0
+DataArchitect
+PdmShowColn
+yes
+27
+111
+0
+DataArchitect
+PdmShowDttp
+yes
+28
+111
+0
+DataArchitect
+PdmShowDomains
+no
+29
+111
+0
+DataArchitect
+PdmShowKeys
+no
+30
+111
+0
+DataArchitect
+PdmShowNull
+no
+31
+111
+0
+DataArchitect
+PdmShowIndx
+no
+32
+111
+0
+DataArchitect
+PdmShowOwnr
+no
+33
+111
+0
+DataArchitect
+PdmShowNameRefr
+no
+34
+111
+0
+DataArchitect
+PdmShowJoinRefr
+yes
+35
+111
+0
+DataArchitect
+PdmShowCnstRefr
+no
+36
+111
+0
+DataArchitect
+PdmShowIdclRefr
+no
+37
+111
+0
+DataArchitect
+PdmShowCardRefr
+no
+38
+111
+0
+DataArchitect
+PdmShowColnView
+yes
+39
+111
+0
+DataArchitect
+PdmShowDttpView
+yes
+40
+111
+0
+DataArchitect
+PdmShowExprView
+yes
+41
+111
+0
+DataArchitect
+PdmShowTablView
+yes
+42
+111
+0
+DataArchitect
+PdmShowOwnrView
+no
+43
+111
+0
+DataArchitect
+PdmRltnMode
+yes
+44
+111
+0
+DataArchitect
+PdmAutoMigrFkey
+yes
+45
+111
+0
+DataArchitect
+PdmAutoMigrDmn
+yes
+46
+111
+0
+DataArchitect
+PdmAutoMigrChk
+yes
+47
+111
+0
+DataArchitect
+PdmAutoMigrRul
+yes
+48
+111
+0
+DataArchitect
+PdmAutoMigrExa
+no
+49
+111
+0
+DataArchitect
+PdmRefrUnique
+yes
+50
+111
+0
+DataArchitect
+PdmColnDmnNoDiv
+yes
+51
+111
+0
+DataArchitect
+PdmColnDmnDivInd
+1
+52
+111
+0
+DataArchitect
+PdmDefDttp
+Text(10)
+53
+111
+0
+DataArchitect
+PdmDefMlen
+10
+54
+111
+0
+DataArchitect
+PdmDefPrec
+0
+55
+111
+0
+DataArchitect
+PdmRebuildIndxPK
+yes
+56
+111
+0
+DataArchitect
+PdmRebuildIndxFK
+yes
+57
+111
+0
+DataArchitect
+PdmRebuildIndxAK
+yes
+58
+111
+0
+DataArchitect
+PdmRebuildIndxPreserve
+no
+59
+111
+0
+DataArchitect
+PKIndexName
+%TABLE%_PK
+60
+111
+0
+DataArchitect
+FKIndexName
+%REFR%_PK
+61
+111
+0
+DataArchitect
+AKIndexName
+%AKEY%_AK
+62
+111
+0
+DataArchitect
+IndexThreshold
+
+63
+111
+0
+DataArchitect
+DwShowSSrv
+no
+64
+111
+0
+DataArchitect
+DwShowLCol
+yes
+65
+111
+0
+DataArchitect
+DwShowLColDttp
+yes
+66
+111
+0
+DataArchitect
+DwShowIQIndx
+yes
+67
+111
+0
+DataArchitect
+DwShowLTblOwnr
+yes
+68
+111
+0
+DataArchitect
+DwShowNameJref
+no
+69
+111
+0
+DataArchitect
+DwShowJoinJref
+yes
+70
+111
+0
+DataArchitect
+DwShowCardJref
+no
+71
+111
+0
+DataArchitect
+Language
+1033
+72
+111
+0
+DataArchitect
+DBOCreaTrgr
+yes
+73
+111
+0
+DataArchitect
+DBODeltTrgr
+yes
+74
+111
+0
+DataArchitect
+DBODropTrgr
+no
+75
+111
+0
+DataArchitect
+DBOInstTrgr
+yes
+76
+111
+0
+DataArchitect
+DBOUpdtTrgr
+yes
+77
+111
+0
+DataArchitect
+DBOChkC1
+yes
+78
+111
+0
+DataArchitect
+DBOChkC2
+yes
+79
+111
+0
+DataArchitect
+DBOChkC3
+yes
+80
+111
+0
+DataArchitect
+DBOChkC4
+yes
+81
+111
+0
+DataArchitect
+DBOChkC5
+yes
+82
+111
+0
+DataArchitect
+DBOChkC6
+yes
+83
+111
+0
+DataArchitect
+DBOChkC7
+yes
+84
+111
+0
+DataArchitect
+DBOChkC8
+yes
+85
+111
+0
+DataArchitect
+DBOChkC9
+yes
+86
+111
+0
+DataArchitect
+DBOChkC10
+yes
+87
+111
+0
+DataArchitect
+DBOChkC11
+yes
+88
+111
+0
+DataArchitect
+DBOStdMsg
+yes
+89
+111
+0
+DataArchitect
+DBOMsgTab
+
+90
+111
+0
+DataArchitect
+DBOMsgNo
+
+91
+111
+0
+DataArchitect
+DBOMsgTxt
+
+92
+111
+0
+DataArchitect
+DBOAltView
+yes
+93
+111
+0
+DataArchitect
+DBOCreaView
+no
+94
+111
+0
+DataArchitect
+DBODropView
+no
+95
+111
+0
+DataArchitect
+DBOOpenDtbs
+no
+96
+111
+0
+DataArchitect
+DBOConsAkey
+yes
+97
+111
+0
+DataArchitect
+DBOConsChck
+yes
+98
+111
+0
+DataArchitect
+DBOConsTChk
+no
+99
+111
+0
+DataArchitect
+DBOConsCChk
+no
+100
+111
+0
+DataArchitect
+DBOConsDChk
+no
+101
+111
+0
+DataArchitect
+DBOConsDeft
+no
+102
+111
+0
+DataArchitect
+DBOConsFkey
+yes
+103
+111
+0
+DataArchitect
+DBOConsIDcl
+yes
+104
+111
+0
+DataArchitect
+DBOConsPkey
+no
+105
+111
+0
+DataArchitect
+DBOConsUddt
+no
+106
+111
+0
+DataArchitect
+DBOCreaUddt
+no
+107
+111
+0
+DataArchitect
+DBODropUddt
+no
+108
+111
+0
+DataArchitect
+DBOUseUddt
+no
+109
+111
+0
+DataArchitect
+DBOConsIDUR
+yes
+110
+111
+0
+DataArchitect
+DBOConsIDUC
+no
+111
+111
+0
+DataArchitect
+DBOConsIDUN
+no
+112
+111
+0
+DataArchitect
+DBOConsIDUD
+no
+113
+111
+0
+DataArchitect
+DBOConsIDDR
+yes
+114
+111
+0
+DataArchitect
+DBOConsIDDC
+no
+115
+111
+0
+DataArchitect
+DBOConsIDDN
+no
+116
+111
+0
+DataArchitect
+DBOConsIDDD
+no
+117
+111
+0
+DataArchitect
+DBOCreaDtbs
+no
+118
+111
+0
+DataArchitect
+DBOCreaProc
+yes
+119
+111
+0
+DataArchitect
+DBODropProc
+no
+120
+111
+0
+DataArchitect
+DBOCreaStor
+no
+121
+111
+0
+DataArchitect
+DBODropDtbs
+no
+122
+111
+0
+DataArchitect
+DBOConsDOpt
+no
+123
+111
+0
+DataArchitect
+DBOConsDBSc
+no
+124
+111
+0
+DataArchitect
+DBOConsDESc
+no
+125
+111
+0
+DataArchitect
+DBODropIndx
+no
+126
+111
+0
+DataArchitect
+DBOConsIOpt
+no
+127
+111
+0
+DataArchitect
+DBOTypeTrgr
+0
+128
+111
+0
+DataArchitect
+DBOAltTrgr
+yes
+129
+111
+0
+DataArchitect
+DBODropStor
+no
+130
+111
+0
+DataArchitect
+DBODropTabl
+yes
+131
+111
+0
+DataArchitect
+DBOCreaTabl
+yes
+132
+111
+0
+DataArchitect
+DBOConsTBSc
+yes
+133
+111
+0
+DataArchitect
+DBOConsTESc
+yes
+134
+111
+0
+DataArchitect
+DBOConsTOpt
+no
+135
+111
+0
+DataArchitect
+DBODrpTmpTbl
+yes
+136
+111
+0
+DataArchitect
+DBOAltTable
+yes
+137
+111
+0
+DataArchitect
+DBOUseTrgUR
+no
+138
+111
+0
+DataArchitect
+DBOUseTrgDR
+no
+139
+111
+0
+DataArchitect
+DBOLowrCase
+no
+140
+111
+0
+DataArchitect
+DBOUpprCase
+no
+141
+111
+0
+DataArchitect
+DBONoAccent
+no
+142
+111
+0
+DataArchitect
+DBOAnsiChar
+no
+143
+111
+0
+DataArchitect
+DBOAddTitle
+no
+144
+111
+0
+DataArchitect
+DBOUseNames
+no
+145
+111
+0
+DataArchitect
+DBOSqlODBC
+yes
+146
+111
+0
+DataArchitect
+DBOChkModl
+yes
+147
+111
+0
+DataArchitect
+DBOAutoArch
+no
+148
+111
+0
+DataArchitect
+DBOTablComm
+no
+149
+111
+0
+DataArchitect
+DBOViewComm
+no
+150
+111
+0
+DataArchitect
+DBOColnComm
+no
+151
+111
+0
+DataArchitect
+DBOCreaTspc
+no
+152
+111
+0
+DataArchitect
+DBOClosDtbs
+no
+153
+111
+0
+DataArchitect
+DBODropTspc
+no
+154
+111
+0
+DataArchitect
+DBOUseTrgUC
+no
+155
+111
+0
+DataArchitect
+DBOUseTrgUN
+no
+156
+111
+0
+DataArchitect
+DBOUseTrgUD
+no
+157
+111
+0
+DataArchitect
+DBOUseTrgDC
+no
+158
+111
+0
+DataArchitect
+DBOUseTrgDN
+no
+159
+111
+0
+DataArchitect
+DBOUseTrgDD
+no
+160
+111
+0
+DataArchitect
+DBOUseQualifier
+no
+161
+111
+0
+DataArchitect
+DBOAltIndex
+yes
+162
+111
+0
+DataArchitect
+DBOAltrIndx
+no
+163
+111
+0
+DataArchitect
+DBOFornIndx
+yes
+164
+111
+0
+DataArchitect
+DBOPrimIndx
+no
+165
+111
+0
+DataArchitect
+DBOOthrIndx
+yes
+/END_TABLE AMCPROP
+
+/BEGIN_TABLE AMCSYMB
+@       N5
+SID     N8
+TSYM    N5
+SSYM    N8
+NUMR    N8
+CSID    N8
+SID1    N8
+SID2    N8
+CLND    N8
+CLNN    N5
+RCX1    N8
+RCY1    N8
+RCX2    N8
+RCY2    N8
+PENS    N5
+BRSH    N5
+CTXT    N8
+FONT    N5
+JUST    N5
+WOVL    N8
+HOVL    N8
+SARR    N5
+CARR    N5
+TARR    N5
+NBPT    N8
+LSPT    BIN
+LSTY    N5
+TEXT    TXT
+PICT    PIC
+BTMP    BMP
+GRPH    N8
+OID     N8
+OLE     BIN
+/BEGIN_DATA AMCSYMB
+2
+2220390
+289
+0
+1
+0
+0
+0
+0
+0
+-20306
+21017
+-7257
+33166
+2
+1
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
+0
+
+
+
+2
+1704
+
+2
+2220391
+289
+0
+2
+0
+0
+0
+0
+0
+2989
+8789
+14613
+26788
+2
+1
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
+0
+
+
+
+2
+1705
+
+3
+2220675
+290
+0
+3
+0
+2220390
+2220391
+0
+0
+0
+0
+0
+0
+2
+3
+0
+0
+0
+0
+0
+1
+0
+0
+3
+2bcaffffd36900002bcaffff7c450000612200007c450000
+2
+
+
+
+2
+1800
+
+/END_TABLE AMCSYMB
+
+
