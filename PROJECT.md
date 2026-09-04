@@ -28,9 +28,9 @@
 
 > **這個專案的功能是從舊的 Delphi6ERP 桌面版系統移轉過來的**，不是從零設計。
 > 舊專案原始碼在 `D:\ERP2026Pg\Delphi6ERP`，正式主程式是
-> [`ERP\Program.DLL\MAINALL\ERP_Main.dpr`](../Delphi6ERP/ERP/Program.DLL/MAINALL/ERP_Main.dpr)
+> [`ERP\Program.DLL\MAINALL\ERP_Main.dpr`](Delphi6ERP/ERP/Program.DLL/MAINALL/ERP_Main.dpr)
 > （Delphi 6 + MSSQL；`Program.DLL`/`SysReport.DLL` 只是資料夾命名慣例，實際是靜態編譯連結成單一
-> exe，不是真的動態載入 DLL）。舊專案根目錄的 [`ProjectSummary.md`](../Delphi6ERP/ProjectSummary.md)
+> exe，不是真的動態載入 DLL）。舊專案根目錄的 [`ProjectSummary.md`](Delphi6ERP/ProjectSummary.md)
 > 有完整的架構/模組/商業邏輯/已知問題盤點，**之後開發任何交易單據/總帳/報表相關功能前，
 > 應該先去讀舊專案對應模組的原始碼跟這份文件**，不要憑空重新設計——資料表結構、業務規則
 > （移動平均成本法、收付款自動過帳邏輯等）都要跟舊系統的實際行為對齊，畢竟資料庫裡的真實
@@ -192,7 +192,7 @@ Password: erpuser
 再全量複製資料：
 
 ```bash
-cd backend/scripts
+cd ERP2026/backend/scripts
 python migrate_mssql_to_pg.py
 ```
 
@@ -222,7 +222,7 @@ python migrate_mssql_to_pg.py
 所以是單純資料複製，不需要欄位轉換，獨立於上面兩個工具之外（它們都明確排除這兩張表）：
 
 ```bash
-cd .claude/skills/import-sysreport
+cd ERP2026/.claude/skills/import-sysreport
 python import_sysreport.py
 ```
 
@@ -256,7 +256,7 @@ python import_sysreport.py
 ### 重新產生資料字典測試資料
 
 ```bash
-cd .claude/skills/run-master-seed
+cd ERP2026/.claude/skills/run-master-seed
 python seed300.py
 ```
 
@@ -273,7 +273,7 @@ python seed300.py
 ### 啟動
 
 ```bash
-cd backend
+cd ERP2026/backend
 pip install -r requirements.txt
 python -m uvicorn main:app --reload --port 8000
 ```
@@ -357,7 +357,7 @@ python -m uvicorn main:app --reload --port 8000
 ### 啟動
 
 ```bash
-cd frontend
+cd ERP2026/frontend
 npm install
 npm run dev
 ```
@@ -576,7 +576,7 @@ Props：`ddmNo`（必填）、`displayField`（選填，畫面顯示欄位）、
 ### 安裝步驟
 
 ```bash
-cd frontend
+cd ERP2026/frontend
 npm install
 ```
 
