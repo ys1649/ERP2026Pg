@@ -1,0 +1,231 @@
+/*==============================================================*/
+/* DBMS name:      PostgreSQL 8                                 */
+/* Created on:     2026/9/1 上午 10:41:43                         */
+/*==============================================================*/
+
+
+drop table TBLDD;
+
+drop table TBLSYSREPORT;
+
+drop table TBLSYSREPORTFIELD;
+
+drop table TBL_DDFIELD;
+
+/*==============================================================*/
+/* Table: TBLDD                                                 */
+/*==============================================================*/
+create table TBLDD (
+   DDM_NO               VARCHAR(80)          not null,
+   DDM_NAME             VARCHAR(80)          not null,
+   DDM_SQL              VARCHAR(4000)        null,
+   IS_MULTI_SELECTED    CHAR(10)             null,
+   RET_VAL_FIELD        VARCHAR(80)          null,
+   constraint PK_TBLDD primary key (DDM_NO)
+);
+
+comment on table TBLDD is
+'資料字典主檔
+資料字典主檔用查詢主檔欄位時，出現Loopup 畫面讓 USER 快速篩選資料';
+
+comment on column TBLDD.DDM_NO is
+'資料字典主檔編號';
+
+comment on column TBLDD.DDM_NAME is
+'資料字典主檔名稱';
+
+comment on column TBLDD.DDM_SQL is
+'定義資料字典的來源資料 SQL';
+
+comment on column TBLDD.IS_MULTI_SELECTED is
+'是否允許多選';
+
+comment on column TBLDD.RET_VAL_FIELD is
+'user 選擇後，返回值的欄位名稱，
+不管是否多選，回傳值都是 JSON ARRAY 格式';
+
+/*==============================================================*/
+/* Table: TBLSYSREPORT                                          */
+/*==============================================================*/
+create table TBLSYSREPORT (
+   SRP_ID               SERIAL               not null,
+   SRP_CODE             VARCHAR(80)          not null,
+   SRP_NAME             VARCHAR(80)          not null,
+   SRP_DESCRIPTION      VARCHAR(255)         null,
+   SRP_SQL              VARCHAR(4000)        not null,
+   SRP_REPORTFILE       TEXT                 null,
+   ORDERBY_LIST         VARCHAR(255)         null,
+   constraint PK_TBLSYSREPORT primary key (SRP_ID)
+);
+
+comment on column TBLSYSREPORT.SRP_CODE is
+'報表編號';
+
+comment on column TBLSYSREPORT.SRP_NAME is
+'報表名稱';
+
+comment on column TBLSYSREPORT.SRP_DESCRIPTION is
+'報表說明';
+
+comment on column TBLSYSREPORT.SRP_SQL is
+'SQL TEXT';
+
+comment on column TBLSYSREPORT.SRP_REPORTFILE is
+'報表 Layout 格式內容';
+
+comment on column TBLSYSREPORT.ORDERBY_LIST is
+'排序欄位清單，JSON 逗號分隔，報表查詢畫面時，會出現排序清單內，USER 可以上下移動排列順序並ˇ指定遞增、遞減
+JSON 以陣列表示，每個陣列2-3個元素
+元素1=欄位名稱
+元素2=欄位顯示名稱
+元素3 (可省略)=ASC 或 DESC  遞增或遞減，預設=ASC
+格式如下:
+[CUM_NO,客戶編號,DESC],
+[CUM_NAME,客戶名稱]
+
+
+';
+
+/*==============================================================*/
+/* Table: TBLSYSREPORTFIELD                                     */
+/*==============================================================*/
+create table TBLSYSREPORTFIELD (
+   SRF_ID               SERIAL               not null,
+   SRP_ID               INT4                 not null,
+   QUERYNAME            VARCHAR(80)          not null,
+   QUERYNAME2           VARCHAR(80)          null,
+   SRF_DISPNAME         VARCHAR(80)          not null,
+   SRF_DATATYPE         VARCHAR(20)          null,
+   SRF_CONTROLTYPE      VARCHAR(20)          not null,
+   SRF_ISMUSTCRITERIA   NUMERIC(1)           not null,
+   SRF_LIST_VALUE       VARCHAR(4000)        null,
+   DDM_NO               VARCHAR(80)          null,
+   DEFAULT_VAL          VARCHAR(80)          null,
+   SORTORDER            NUMERIC(6)           not null,
+   constraint PK_TBLSYSREPORTFIELD primary key (SRF_ID),
+   constraint FK_TBLSYSRE_REFERENCE_TBLDD foreign key (DDM_NO)
+      references TBLDD (DDM_NO)
+      on delete restrict on update restrict,
+   constraint FK_TBLSYSRE_REFERENCE_TBLSYSRE foreign key (SRP_ID)
+      references TBLSYSREPORT (SRP_ID)
+      on delete restrict on update restrict
+);
+
+comment on column TBLSYSREPORTFIELD.QUERYNAME is
+'查詢變數名稱
+除了 between to 以外的所有的查詢變數都放在這裡
+
+';
+
+comment on column TBLSYSREPORTFIELD.QUERYNAME2 is
+'查詢變數名稱2，
+只放 between to 的查詢變數，其他種類的查詢子句都放在 QUERYNAME，
+如果不是 BETWEEN 的查詢方式，此欄位=NULL
+
+
+
+';
+
+comment on column TBLSYSREPORTFIELD.SRF_DISPNAME is
+'查詢畫面顯示名稱';
+
+comment on column TBLSYSREPORTFIELD.SRF_DATATYPE is
+'資料型態
+TEXT,NUMBER,BOOLEAN，
+當 資料型態= BOOLEAN時，轉換成 SQL 語法時，BOOLEAN 會轉成 1 跟 0';
+
+comment on column TBLSYSREPORTFIELD.SRF_CONTROLTYPE is
+'控制項類別，有下面幾種:
+TEXT:對應產生 TEXT 輸入框
+DATE:對應產生 DateTime picker 輸入框
+NUMBER:對應產生 數字(包含小數) 輸入框
+BOOLEAN:顯示 CHECKBOX ，SQL VALUE 自動轉成 0 或 1
+LIST:搭配 SRF_LIST_VALUE，產生 DropList 
+DDLookupEdit:對應產生 DDLookupEdit 控制項，必須指定 DDM_NO 
+
+所有控制項旁邊都有一個  打叉的清除 icon，可將該控制項內容清除為 null
+';
+
+comment on column TBLSYSREPORTFIELD.SRF_ISMUSTCRITERIA is
+'是否為必要條件，
+若是必要條件，則 user 必須輸入，不允許空白';
+
+comment on column TBLSYSREPORTFIELD.SRF_LIST_VALUE is
+'選項列表，當控制項類別是LIST時，這個欄位存放逗號分隔的選項內容';
+
+comment on column TBLSYSREPORTFIELD.DDM_NO is
+'DDM_NO:存放 DDLookupEdit 的 DDM_NO
+當控制項類別=DDLookupEdit，此欄位放置資料字典主檔編號 DDM_NO';
+
+comment on column TBLSYSREPORTFIELD.DEFAULT_VAL is
+'預設值，當該查詢欄位 user 未輸入時，以預設值取代';
+
+comment on column TBLSYSREPORTFIELD.SORTORDER is
+'查詢欄位的排列順序';
+
+
+insert into tblsysreport (SRP_CODE, SRP_NAME, SRP_DESCRIPTION, SRP_SQL, ORDERBY_LIST)
+values ('M_Customer', '客戶清單', null, 'SELECT A.*
+FROM TBL_CUSTOMER A
+WHERE A.CUM_NO LIKE :CUM_NO
+  AND A.CUM_NAME LIKE :CUM_NAME
+', '[CUM_NO,客戶編號],[CUM_NAME,客戶名稱,DESC]');
+
+
+insert into tblsysreportfield (SRP_ID, QUERYNAME, QUERYNAME2, SRF_DISPNAME, SRF_DATATYPE, SRF_CONTROLTYPE, SRF_ISMUSTCRITERIA, SRF_LIST_VALUE, DDM_NO, DEFAULT_VAL, SORTORDER)
+values (
+  (select SRP_ID from TBLSYSREPORT where SRP_CODE = 'M_Customer'),
+  'CUM_NO', null, '客戶編號', 'TEXT', 'TEXT', 0, null, null, '%', 1
+);
+
+insert into tblsysreportfield (SRP_ID, QUERYNAME, QUERYNAME2, SRF_DISPNAME, SRF_DATATYPE, SRF_CONTROLTYPE, SRF_ISMUSTCRITERIA, SRF_LIST_VALUE, DDM_NO, DEFAULT_VAL, SORTORDER)
+values (
+  (select SRP_ID from TBLSYSREPORT where SRP_CODE = 'M_Customer'),
+  'CUM_NAME', null, '客戶名稱', 'TEXT', 'TEXT', 0, null, null, '%', 2
+);
+
+COMMIT;
+
+/*==============================================================*/
+/* Table: TBL_DDFIELD                                           */
+/*==============================================================*/
+create table TBL_DDFIELD (
+   DDD_ID               SERIAL               not null,
+   DDM_NO               VARCHAR(80)          null,
+   DDD_FIELD            VARCHAR(80)          null,
+   DDD_FIELD_DISP       VARCHAR(80)          null,
+   constraint PK_TBL_DDFIELD primary key (DDD_ID),
+   constraint AK_KEY_2_TBL_DDFI unique (DDM_NO, DDD_FIELD_DISP),
+   constraint FK_TBL_DDFI_REFERENCE_TBLDD foreign key (DDM_NO)
+      references TBLDD (DDM_NO)
+      on delete restrict on update restrict
+);
+
+comment on table TBL_DDFIELD is
+'資料字典欄位定義';
+
+comment on column TBL_DDFIELD.DDM_NO is
+'資料字典主檔編號';
+
+comment on column TBL_DDFIELD.DDD_FIELD is
+'欄位名稱';
+
+comment on column TBL_DDFIELD.DDD_FIELD_DISP is
+'欄位顯示';
+
+
+insert into TBLDD (DDM_NO, DDM_NAME, DDM_SQL, IS_MULTI_SELECTED, RET_VAL_FIELD)
+values ('TBLDD', '資料字典', 'SELECT A.DDM_NO,A.DDM_NAME
+FROM TBLDD A
+ORDER BY A.DDM_NO', 'N         ', 'DDM_NO');
+
+
+
+insert into TBL_DDFIELD (DDD_ID, DDM_NO, DDD_FIELD, DDD_FIELD_DISP)
+values (2, 'TBLDD', 'DDM_NAME', '資料字典名稱');
+
+insert into TBL_DDFIELD (DDD_ID, DDM_NO, DDD_FIELD, DDD_FIELD_DISP)
+values (1, 'TBLDD', 'DDM_NO', '資料字典編號');
+
+COMMIT;
+

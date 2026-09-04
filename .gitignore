@@ -1,0 +1,12 @@
+# Delphi6ERP 跟 ERP2026 各自是獨立的 git repo（分開開發、分開推送），
+# 這裡刻意排除，不要巢狀 tracking 進這層的 repo
+/Delphi6ERP/
+/ERP2026/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
