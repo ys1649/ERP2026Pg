@@ -727,6 +727,12 @@ npm install
   - [x] `SysReportFieldPicker`：`SRF_CONTROLTYPE=SQL` 查詢欄位的單選/多選挑選視窗，執行欄位自己的 `SRF_LIST_SQL`
   - [x] Stimulsoft Designer 版面設計，版面存 `TBLSYSREPORT.SRP_REPORTFILE`，開啟時自動帶入查詢結果讓 DataSource 立即可用
   - [x] 實測驗證：MSSQL 匯入的真實報表定義（`FM_CUM_001` 客戶編號速查表，含 Single/MultiSelect/Range 三種查詢欄位）在新引擎下正確執行
+- [x] 主檔資訊全數移植完成（客戶/供應商/產品/員工/車輛/會計科目，共 6 個模組）
+  - [x] **畫面模式：列表 + 新增/編輯 Modal**（antd Table 分頁顯示，關鍵字搜尋，`Modal` 彈窗表單新增/編輯，`Popconfirm` 確認刪除）。曾經短暫改成比照 Delphi6ERP 原版的單筆顯示＋瀏覽跳頁＋底下工具列模式（`components/MasterDetailPage.jsx`），使用者測試後要求還原回列表模式，2026-09-07 已還原，`MasterDetailPage.jsx` 已刪除
+  - [x] 車輛主檔（`tbl_car`，`/basic/car`）與會計科目設定（`tbl_acnt_account`，`/basic/acnt-account`）：menuConfig 原本完全沒有這兩個項目，這次一併補上
+  - [x] 產品的 `prd_onhand`/`prd_cur_cost` 維持唯讀（系統維護欄位，之後成本作業模組才會更新）；員工密碼沿用明碼儲存（尚無登入系統）
+  - [x] 後端 5 個模組（客戶/供應商/產品/員工/車輛）額外提供 `PUT /{id}/renumber`（比照各自 Delphi `Modify_NO` 程序：新編號複製一筆、串接更新所有關聯明細表外鍵、刪除舊編號，整個包在一個交易裡——Postgres 這幾張表都設了 FK `ON UPDATE RESTRICT`，不能直接改主鍵，這個交易順序是必要的不是舊系統的隨意選擇），**但目前列表+Modal 畫面沒有任何按鈕呼叫它**，是預留給以後要在列表畫面加「編號變更」動作時用的。會計科目沒有這個端點：舊系統的 `form_account.pas` 雖然宣告了 `ActEditNo` 動作但從未指定 `OnExecute`，照實不做
+  - 範圍排除（未列入這次移植）：報表列印（Stimulsoft 設計器/預覽，客戶主檔已有、其餘 5 個模組還沒有對應 `.mrt` 報表定義）
 
 ---
 
@@ -735,14 +741,12 @@ npm install
 > 以下功能的**資料庫表跟真實資料已經在 `erp` 裡了**（Delphi6ERP／MSSQL 遷移過來的 29 張業務表，見〈資料庫〉章節），
 > 缺的是後端 API 與前端頁面。
 
-- [ ] 供應商主檔維護頁面（`tbl_supplier`，`/basic/supplier`）
-- [ ] 產品主檔維護頁面（`tbl_product`，`/basic/product`）
-- [ ] 員工資料管理（`tbl_employe`，`/basic/employee`）
 - [ ] 交易單據維護（訂單 / 出貨單 `tbl_ship`／`tbl_ship_dt` / 進貨單 `tbl_po_recv`／`tbl_po_recv_dt` / 應收 `tbl_ar_recv` / 應付 `tbl_ap_pay` / 雜收發單據，見 `menuConfig.js` 的 `trade` 分類）
 - [ ] 管理報表（應付/應收帳款統計表、明細表，見 `report` 分類；`ST_RPT_*`/`MG_*` 等對應報表定義已從 Delphi6ERP 匯入 `tblsysreport`，可以直接用系統報表模組承接，不一定要另外寫頁面）
-- [ ] 會計總帳系統（傳票維護 `tbl_acnt_journal`／`tbl_acnt_journal_dt`、損益表、資產負債表、現金流量表，見 `gl` 分類；會計科目 `tbl_acnt_account`／`tbl_acnt_type` 資料已就緒）
-- [ ] 成本作業（期間維護，見 `cost` 分類；庫存移動平均成本流水帳 `tbl_transaction` 資料已就緒，重算邏輯要參考 Delphi6ERP `erp_public.pas` 的 `InsertTransaction`/`UpdateTransaction` 重新實作，注意併發寫入下的成本重算正確性）
-- [ ] 系統設定其餘項目（功能權限管理、系統資料設定、系統備份與還原，見 `system` 分類）
+- [ ] 會計總帳系統（傳票維護 `tbl_acnt_journal`／`tbl_acnt_journal_dt`、損益表、資產負債表，見 `gl` 分類；會計科目主檔已完成，見〈已完成功能〉）
+- [ ] 成本作業（期間維護，見 `cost` 分類；庫存移動平均成本流水帳 `tbl_transaction` 資料已就緒，重算邏輯要參考 Delphi6ERP `erp_public.pas` 的 `InsertTransaction`/`UpdateTransaction` 重新實作，注意併發寫入下的成本重算正確性；會計年度結轉 `Form_AcntChgYear.pas` 也歸在系統模組範疇，見下一項）
+- [ ] 系統設定其餘項目（功能權限管理、系統資料設定、系統備份與還原、會計年度結轉，見 `system` 分類）
+- [ ] 主檔資訊的報表列印（Stimulsoft 設計器/預覽，比照客戶主檔的 `CustomerReport`/`CustomerReportPreview` 模式，供應商/產品/員工/車輛/會計科目目前都還沒有對應 `.mrt` 報表定義與列印按鈕）
 - [ ] 使用者登入 / 權限控管（Delphi6ERP 原本有硬編碼萬用密碼 `WYS`/`WYSEN` 後門，新系統設計登入機制時不要沿用）
 - [ ] 52 份系統報表逐一在 Stimulsoft Designer 重新設計版面（`SRP_REPORTFILE` 目前都是 NULL，ReportBuilder 版面無法自動轉換，見〈匯入系統報表定義〉小節）
 - [ ] Docker 部署設定

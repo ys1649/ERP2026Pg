@@ -8,5 +8,6 @@ export const customerApi = {
   create: (data) => api.post('/customers', data),
   update: (id, data) => api.put(`/customers/${id}`, data),
   remove: (id) => api.delete(`/customers/${id}`),
+  renumber: (id, newNo) => api.put(`/customers/${id}/renumber`, { new_no: newNo }),
   reportDataUrl: () => `${window.location.origin}/api/customers/report-data`,
 }

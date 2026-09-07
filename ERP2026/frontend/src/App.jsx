@@ -3,6 +3,11 @@ import MainLayout from './layouts/MainLayout'
 import Home from './pages/Home'
 import Placeholder from './pages/Placeholder'
 import CustomerMaster from './pages/CustomerMaster'
+import SupplierMaster from './pages/SupplierMaster'
+import ProductMaster from './pages/ProductMaster'
+import EmployeeMaster from './pages/EmployeeMaster'
+import CarMaster from './pages/CarMaster'
+import AcntAccountMaster from './pages/AcntAccountMaster'
 import DataDictMaster from './pages/DataDictMaster'
 import SysReportMaster from './pages/SysReportMaster'
 import MssqlMigrate from './pages/MssqlMigrate'
@@ -10,6 +15,11 @@ import { flatMenuItems } from './menuConfig'
 
 const readyComponents = {
   '/basic/customer': CustomerMaster,
+  '/basic/supplier': SupplierMaster,
+  '/basic/product': ProductMaster,
+  '/basic/employee': EmployeeMaster,
+  '/basic/car': CarMaster,
+  '/basic/acnt-account': AcntAccountMaster,
   '/system/datadict': DataDictMaster,
   '/system/report': SysReportMaster,
   '/system/mssql-migrate': MssqlMigrate,

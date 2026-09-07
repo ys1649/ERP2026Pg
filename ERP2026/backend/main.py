@@ -3,7 +3,18 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import customers, reports, data_dict, sysreport, mssql_migrate
+from routers import (
+    customers,
+    reports,
+    data_dict,
+    sysreport,
+    mssql_migrate,
+    suppliers,
+    products,
+    employees,
+    cars,
+    acnt_accounts,
+)
 
 LOG_FILE = Path(__file__).resolve().parent / "uvicorn_8000.log"
 logging.basicConfig(
@@ -28,6 +39,11 @@ app.include_router(reports.router, prefix="/api/reports", tags=["reports"])
 app.include_router(data_dict.router, prefix="/api/datadict", tags=["data-dict"])
 app.include_router(sysreport.router, prefix="/api/sysreport", tags=["sysreport"])
 app.include_router(mssql_migrate.router, prefix="/api/mssql-migrate", tags=["mssql-migrate"])
+app.include_router(suppliers.router, prefix="/api/suppliers", tags=["suppliers"])
+app.include_router(products.router, prefix="/api/products", tags=["products"])
+app.include_router(employees.router, prefix="/api/employees", tags=["employees"])
+app.include_router(cars.router, prefix="/api/cars", tags=["cars"])
+app.include_router(acnt_accounts.router, prefix="/api/acnt-accounts", tags=["acnt-accounts"])
 
 if __name__ == "__main__":
     import uvicorn

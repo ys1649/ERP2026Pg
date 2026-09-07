@@ -27,6 +27,10 @@ class CustomerCreate(BaseModel):
     cum_inv_rate: float = 0.05
 
 
+class RenumberRequest(BaseModel):
+    new_no: str
+
+
 class CustomerUpdate(BaseModel):
     cum_name: str
     cum_president: Optional[str] = None
@@ -54,7 +58,7 @@ def row_to_dict(cur, row):
 def list_customers(
     q: Optional[str] = Query(None, description="搜尋客戶編號/名稱/統編"),
     page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=500),
+    page_size: int = Query(20, ge=1, le=10000),
 ):
     with get_conn() as conn:
         cur = conn.cursor()
@@ -194,3 +198,43 @@ def delete_customer(cum_no: str):
         if cur.rowcount == 0:
             raise HTTPException(404, "客戶不存在")
         return {"message": "刪除成功"}
+
+
+@router.put("/{cum_no}/renumber")
+def renumber_customer(cum_no: str, data: RenumberRequest):
+    """比照 Delphi6ERP FORM_CUSTOMER.pas 的 Modify_NO：新編號複製一筆主檔，
+    串連更新 TBL_SHIP/TBL_HIS_SHIP/TBL_AR_RECV 的 CUM_NO，再刪除舊編號。"""
+    new_no = data.new_no.strip()
+    if not new_no:
+        raise HTTPException(400, "新編號不可為空白")
+    with get_conn() as conn:
+        cur = conn.cursor()
+        try:
+            cur.execute(
+                """INSERT INTO TBL_CUSTOMER
+                       (CUM_NO,CUM_NAME,CUM_PRESIDENT,CUM_CONTANT,CUM_CONT_TITLE,
+                        CUM_TEL1,CUM_TEL2,CUM_FAX,CUM_UNIFORM_NO,
+                        CUM_INV_ADDR,CUM_ADDR,CUM_ZIP_CODE,
+                        CUM_ADVANCE_AMOUNT,CUM_DESC,CUM_CREATOR,
+                        CUM_ACNT_AR,CUM_ACNT_ADVANCE,CUM_INV_RATE)
+                   SELECT %(new_no)s,CUM_NAME,CUM_PRESIDENT,CUM_CONTANT,CUM_CONT_TITLE,
+                          CUM_TEL1,CUM_TEL2,CUM_FAX,CUM_UNIFORM_NO,
+                          CUM_INV_ADDR,CUM_ADDR,CUM_ZIP_CODE,
+                          CUM_ADVANCE_AMOUNT,CUM_DESC,CUM_CREATOR,
+                          CUM_ACNT_AR,CUM_ACNT_ADVANCE,CUM_INV_RATE
+                     FROM TBL_CUSTOMER WHERE CUM_NO=%(old_no)s""",
+                {"new_no": new_no, "old_no": cum_no},
+            )
+        except UniqueViolation:
+            raise HTTPException(409, "新編號已存在")
+        if cur.rowcount == 0:
+            raise HTTPException(404, "客戶不存在")
+
+        cur.execute("UPDATE TBL_SHIP SET CUM_NO=%(new_no)s WHERE CUM_NO=%(old_no)s",
+                    {"new_no": new_no, "old_no": cum_no})
+        cur.execute("UPDATE TBL_HIS_SHIP SET CUM_NO=%(new_no)s WHERE CUM_NO=%(old_no)s",
+                    {"new_no": new_no, "old_no": cum_no})
+        cur.execute("UPDATE TBL_AR_RECV SET CUM_NO=%(new_no)s WHERE CUM_NO=%(old_no)s",
+                    {"new_no": new_no, "old_no": cum_no})
+        cur.execute("DELETE FROM TBL_CUSTOMER WHERE CUM_NO=%(old_no)s", {"old_no": cum_no})
+        return {"message": "編號變更成功", "new_no": new_no}

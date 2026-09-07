@@ -27,6 +27,7 @@ import {
   CalculatorOutlined,
   SettingOutlined,
   SyncOutlined,
+  BookOutlined,
 } from '@ant-design/icons'
 
 // 整個系統的功能目錄結構。leaf 節點若帶 ready:true 代表已經有實際頁面（component），
@@ -38,9 +39,11 @@ export const menuTree = [
     icon: TeamOutlined,
     children: [
       { key: 'basic-customer', label: '客戶資料管理', path: '/basic/customer', icon: UserOutlined, ready: true },
-      { key: 'basic-supplier', label: '廠商資料管理', path: '/basic/supplier', icon: ShopOutlined },
-      { key: 'basic-product', label: '產品資料管理', path: '/basic/product', icon: AppstoreOutlined },
-      { key: 'basic-employee', label: '員工資料管理', path: '/basic/employee', icon: IdcardOutlined },
+      { key: 'basic-supplier', label: '廠商資料管理', path: '/basic/supplier', icon: ShopOutlined, ready: true },
+      { key: 'basic-product', label: '產品資料管理', path: '/basic/product', icon: AppstoreOutlined, ready: true },
+      { key: 'basic-employee', label: '員工資料管理', path: '/basic/employee', icon: IdcardOutlined, ready: true },
+      { key: 'basic-car', label: '車輛資料管理', path: '/basic/car', icon: CarOutlined, ready: true },
+      { key: 'basic-acnt-account', label: '會計科目設定', path: '/basic/acnt-account', icon: BookOutlined, ready: true },
     ],
   },
   {
