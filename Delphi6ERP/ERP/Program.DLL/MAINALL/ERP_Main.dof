@@ -41,7 +41,7 @@ MaxStackSize=1048576
 ImageBase=4194304
 ExeDescription=
 [Directories]
-OutputDir=
+OutputDir=d:\ERP2026Pg\Delphi6ERP\ERP\Program.DLL\EXE
 UnitOutputDir=
 PackageDLLOutputDir=
 PackageDCPOutputDir=
@@ -49,7 +49,7 @@ SearchPath=
 Packages=vcl;rtl;dbrtl;adortl;vcldb;vclx;bdertl;vcldbx;ibxpress;dsnap;cds;bdecds;qrpt;teeui;teedb;tee;dss;teeqr;visualclx;visualdbclx;dsnapcrba;dsnapcon;VclSmp;vclshlctrls;inetdb;inet;nmfast;vclie;dbexpress;dbxcds;indy;dclOffice2k;rbTDBC61;rbRCL66;rbCIDE66;rbIDE66;rbBDE66;rbRIDE66;rbRAP66;rbDBDE66;rbDAD66;rbDIDE66;rbUSER66;rbDB66;rbADO66;rbDBE66;rbIBE66;xtradev;dxEdtrD6;dxcomnd6;EQTLD6;ECQDBCD6;EQDBTLD6;EQGridD6;dxGrEdD6;dxExELD6;dxELibD6;ip3000clientvcl6;ip3000v6;ip3000word2000vcl6;xmlrtl;inetdbbde;inetdbxpress;webdsnap;websnap
 Conditionals=
 DebugSourceDirs=
-UsePackages=0
+UsePackages=1
 [Parameters]
 RunParams=
 HostApplication=
@@ -89,6 +89,7 @@ Comments=
 Count=1
 Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
 [HistoryLists\hlOutputDirectorry]
-Count=2
-Item0=d:\Delphi6ERP\ERP\Program.DLL\EXE
-Item1=d:\ErpMSSQL\ERP\Program.DLL\EXE
+Count=3
+Item0=d:\ERP2026Pg\Delphi6ERP\ERP\Program.DLL\EXE
+Item1=d:\Delphi6ERP\ERP\Program.DLL\EXE
+Item2=d:\ErpMSSQL\ERP\Program.DLL\EXE
