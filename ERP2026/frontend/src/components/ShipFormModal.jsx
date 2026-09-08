@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useLayoutEffect } from 'react'
 import {
-  Modal, Form, Input, InputNumber, DatePicker, Select, Button, Space,
+  Modal, Form, Input, InputNumber, DatePicker, Button, Space,
   Table, message, Tag, Typography, Row, Col,
 } from 'antd'
 import {
@@ -18,6 +18,7 @@ import { employeeApi } from '../api/employees'
 import { carApi } from '../api/cars'
 import { productApi } from '../api/products'
 import { DDLookup } from '../lib/ddLookup'
+import { SearchSelect } from './SearchSelect'
 
 const { Text } = Typography
 const { TextArea } = Input
@@ -38,48 +39,6 @@ const HIST_DARK_CSS = `
 .ship-hist-dark .ant-table-placeholder > td { background: transparent !important; color: rgba(255,255,255,0.65) !important; }
 .ship-hist-dark .ant-empty-description { color: rgba(255,255,255,0.65) !important; }
 `
-
-function SearchSelect({ fetcher, valueField, labelFn, value, initialLabel, onChange, placeholder, disabled, style }) {
-  const [options, setOptions] = useState([])
-  const [loading, setLoading] = useState(false)
-
-  const search = useCallback(async (q) => {
-    setLoading(true)
-    try {
-      const res = await fetcher(q)
-      const rows = res.data.data || res.data
-      setOptions(rows.map((r) => ({ value: r[valueField], label: labelFn(r) })))
-    } catch {
-      setOptions([])
-    } finally {
-      setLoading(false)
-    }
-  }, [fetcher, valueField, labelFn])
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { search('') }, [])
-
-  const hasCurrent = value != null && options.some((o) => o.value === value)
-  const mergedOptions = (!hasCurrent && value != null)
-    ? [{ value, label: initialLabel || value }, ...options]
-    : options
-
-  return (
-    <Select
-      showSearch
-      allowClear
-      filterOption={false}
-      loading={loading}
-      onSearch={search}
-      options={mergedOptions}
-      value={value || undefined}
-      onChange={onChange}
-      placeholder={placeholder}
-      disabled={disabled}
-      style={style}
-    />
-  )
-}
 
 const STATUS_TAG = { 0: <Tag color="orange">未確認</Tag>, 1: <Tag color="green">已確認</Tag> }
 

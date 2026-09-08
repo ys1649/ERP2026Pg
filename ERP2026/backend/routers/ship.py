@@ -88,12 +88,45 @@ def _check_year(sp: dict, smt_date):
         raise HTTPException(400, "不可修改小於本會計年度的傳票")
 
 
+SORTABLE_COLUMNS = {
+    "smt_no": "M.SMT_NO",
+    "smt_date": "M.SMT_DATE",
+    "cum_no": "M.CUM_NO",
+    "cum_name": "C.CUM_NAME",
+    "epy_name": "E.EPY_NAME",
+    "smt_inv_no": "M.SMT_INV_NO",
+    "smt_amount": "(M.SMT_TOTAL+M.SMT_TAX)",
+    "smt_not_clean": "M.SMT_NOT_CLEAN",
+    "smt_status": "M.SMT_STATUS",
+}
+
+
+def _parse_sort(sort: Optional[str]) -> str:
+    """把前端表格欄位排序（如 "smt_date:desc,cum_no:asc"）轉成 ORDER BY 子句，僅接受白名單欄位。"""
+    if not sort:
+        return "M.SMT_DATE DESC, M.SMT_NO DESC"
+    parts = []
+    for item in sort.split(","):
+        field, _, direction = item.partition(":")
+        col = SORTABLE_COLUMNS.get(field.strip())
+        if not col:
+            continue
+        parts.append(f"{col} {'DESC' if direction.strip() == 'desc' else 'ASC'}")
+    return ", ".join(parts) if parts else "M.SMT_DATE DESC, M.SMT_NO DESC"
+
+
 @router.get("")
 def list_ships(
     q: Optional[str] = Query(None),
     status: Optional[int] = Query(None),
     date_from: Optional[str] = Query(None),
     date_to: Optional[str] = Query(None),
+    cum_no: Optional[str] = Query(None),
+    epy_no: Optional[str] = Query(None),
+    smt_no: Optional[str] = Query(None),
+    smt_inv_no: Optional[str] = Query(None),
+    prd_no: Optional[str] = Query(None),
+    sort: Optional[str] = Query(None),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=500),
 ):
@@ -117,7 +150,23 @@ def list_ships(
         if date_to:
             where.append("M.SMT_DATE<%(date_to)s::date + 1")
             params["date_to"] = date_to
+        if cum_no:
+            where.append("M.CUM_NO=%(cum_no)s")
+            params["cum_no"] = cum_no
+        if epy_no:
+            where.append("M.EPY_NO=%(epy_no)s")
+            params["epy_no"] = epy_no
+        if smt_no:
+            where.append("UPPER(M.SMT_NO) LIKE UPPER(%(smt_no)s)")
+            params["smt_no"] = f"%{smt_no}%"
+        if smt_inv_no:
+            where.append("UPPER(M.SMT_INV_NO) LIKE UPPER(%(smt_inv_no)s)")
+            params["smt_inv_no"] = f"%{smt_inv_no}%"
+        if prd_no:
+            where.append("EXISTS (SELECT 1 FROM TBL_SHIP_DT D WHERE D.SMT_NO=M.SMT_NO AND D.PRD_NO=%(prd_no)s)")
+            params["prd_no"] = prd_no
         where_sql = " AND ".join(where)
+        order_sql = _parse_sort(sort)
 
         cur.execute(
             f"""SELECT COUNT(*) FROM TBL_SHIP M
@@ -136,7 +185,7 @@ def list_ships(
                 LEFT JOIN TBL_CUSTOMER C ON C.CUM_NO=M.CUM_NO
                 LEFT JOIN TBL_EMPLOYE E ON E.EPY_NO=M.EPY_NO
                 WHERE {where_sql}
-                ORDER BY M.SMT_DATE DESC, M.SMT_NO DESC
+                ORDER BY {order_sql}
                 OFFSET %(offset)s ROWS FETCH NEXT %(lim)s ROWS ONLY""",
             {**params, "offset": offset, "lim": page_size},
         )
