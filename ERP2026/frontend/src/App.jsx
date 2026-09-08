@@ -8,6 +8,7 @@ import ProductMaster from './pages/ProductMaster'
 import EmployeeMaster from './pages/EmployeeMaster'
 import CarMaster from './pages/CarMaster'
 import AcntAccountMaster from './pages/AcntAccountMaster'
+import ShipList from './pages/ShipList'
 import DataDictMaster from './pages/DataDictMaster'
 import SysReportMaster from './pages/SysReportMaster'
 import MssqlMigrate from './pages/MssqlMigrate'
@@ -20,6 +21,7 @@ const readyComponents = {
   '/basic/employee': EmployeeMaster,
   '/basic/car': CarMaster,
   '/basic/acnt-account': AcntAccountMaster,
+  '/trade/shipment': ShipList,
   '/system/datadict': DataDictMaster,
   '/system/report': SysReportMaster,
   '/system/mssql-migrate': MssqlMigrate,

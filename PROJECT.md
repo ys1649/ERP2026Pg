@@ -1,6 +1,6 @@
 # ERP2026 進銷存系統 — 開發文件
 
-> 最後更新：2026-09-04（29 張業務表改由 Delphi6ERP／MSSQL 搬入真實資料；系統報表模組改成跟 Delphi6ERP 一樣的動態組 SQL 引擎，詳見〈資料庫〉〈系統報表模組〉章節）
+> 最後更新：2026-09-07（主檔資訊補齊供應商/產品/員工/車輛/會計科目 5 個模組，均為列表+Modal CRUD；詳見〈目錄結構〉〈已完成功能〉章節）
 
 ---
 
@@ -66,6 +66,8 @@
 | antd | 6.x | UI 元件庫（繁體中文 zh_TW） |
 | axios | 最新 | HTTP 用戶端 |
 | stimulsoft-reports-js | 2026.3.2 | 報表設計器（需另購授權） |
+| react-draggable | 4.7.1 | 可拖曳 Modal（比照 antd 官方「可拖曳」範例），目前用於出貨單新增/編輯彈窗 |
+| react-resizable | 4.0.2 | 可縮放 Modal，跟 react-draggable 搭配用於出貨單新增/編輯彈窗 |
 
 ---
 
@@ -82,8 +84,19 @@ ERP2026/
 │   │   ├── migrate_mssql_to_pg.py   # ★ Delphi6ERP（MSSQL）→ PostgreSQL 一次性搬 29 張業務表（含 DDL 產生 + 中文欄位註解）
 │   │   ├── pdm_comments.json        # 從 PowerDesigner ERP.pdm 解析出的中文欄位名，migrate_mssql_to_pg.py 用來產生 COMMENT ON
 │   │   └── ddl_from_mssql.sql       # migrate_mssql_to_pg.py 執行時自動產生的 DDL 存檔（供參考/除錯，非手動維護）
+│   ├── services/            # ★ 跨模組共用的業務邏輯（不是某個 router 專屬），未來 PO_RECV/INV_ADJ 等要重用
+│   │   ├── numbering.py     # next_code：比照 DBUty.pas 的 GetNumbericCode（yyyymmdd+補零序號）
+│   │   ├── inventory.py     # 移動平均成本引擎：insert_transaction/update_transaction/delete_transactions_and_recalc，比照 erp_public.pas 的 InsertTransaction/UpdateTransaction
+│   │   ├── accounting.py    # GL 過帳輔助：insert_journal/insert_journal_line/chk_dc_balance/delete_journal
+│   │   └── sysparam.py      # get_sys_param：讀 TBL_SYS_PARAM 一整列參數
 │   └── routers/
-│       ├── customers.py     # 客戶主檔 CRUD + report-data API
+│       ├── customers.py     # 客戶主檔 CRUD + report-data API + renumber（編號變更）
+│       ├── suppliers.py     # 廠商主檔 CRUD + renumber
+│       ├── products.py      # 產品主檔 CRUD + renumber（prd_onhand/prd_cur_cost 唯讀，系統維護欄位）
+│       ├── employees.py     # 員工主檔 CRUD + renumber
+│       ├── cars.py          # 車輛主檔 CRUD + renumber
+│       ├── acnt_accounts.py # 會計科目主檔 CRUD（無 renumber，比照 Delphi6ERP 沒做這個功能）+ /types 科目類別下拉選單
+│       ├── ship.py          # ★ 出貨單 CRUD + book/unbook(確認/取消確認) + quick-collect(快速收款) + history(歷史查詢) + price(客戶歷史單價查詢)
 │       ├── reports.py       # 報表檔案列表 + 下載 API（no-cache）
 │       ├── data_dict.py     # 資料字典主檔/欄位 CRUD + Lookup meta/data API
 │       ├── sysreport.py     # 系統報表主檔/欄位 CRUD + 動態查詢引擎（比照 Delphi6ERP 動態組 WHERE/ORDER BY）+ 版面讀寫
@@ -117,7 +130,13 @@ ERP2026/
 │       ├── menuConfig.js        # ★ 全系統功能目錄結構（分類/項目/路徑/icon/ready），首頁與側邊選單共用同一份資料
 │       ├── style.css            # 全域樣式
 │       ├── api/
-│       │   ├── customers.js     # customerApi（axios）
+│       │   ├── customers.js     # customerApi（axios，含 renumber）
+│       │   ├── suppliers.js     # supplierApi（含 renumber）
+│       │   ├── products.js      # productApi（含 renumber）
+│       │   ├── employees.js     # employeeApi（含 renumber）
+│       │   ├── cars.js          # carApi（含 renumber）
+│       │   ├── acntAccounts.js  # acntAccountApi：CRUD + listTypes（科目類別下拉選單資料來源）
+│       │   ├── ship.js          # ★ shipApi：CRUD + book/unbook/quickCollect/price/history
 │       │   ├── reports.js       # reportApi：listCustomer / customerReportUrl（含 cache-buster）
 │       │   ├── datadict.js      # dataDictApi：主檔/欄位 CRUD、meta、data
 │       │   ├── sysreport.js     # sysReportApi：主檔/欄位 CRUD、selectColumns、fieldLookupData、query-meta、runQuery
@@ -131,11 +150,23 @@ ERP2026/
 │       │   ├── Home.jsx             # ★ 首頁：依 menuConfig 分類顯示各功能入口卡片（含 Home.css）
 │       │   ├── Placeholder.jsx      # ★ 尚未開發功能的預留頁面（依目前路徑自動顯示標題/分類）
 │       │   ├── CustomerMaster.jsx   # 客戶主檔維護頁面
+│       │   ├── SupplierMaster.jsx   # 廠商主檔維護頁面
+│       │   ├── ProductMaster.jsx    # 產品主檔維護頁面
+│       │   ├── EmployeeMaster.jsx   # 員工主檔維護頁面（編輯前會先呼叫一次 GET /employees/{id}；目前列表 API 其實也回傳密碼欄位了，這個額外呼叫已經是多餘的，之後有空可以拿掉）
+│       │   ├── CarMaster.jsx        # 車輛主檔維護頁面
+│       │   ├── AcntAccountMaster.jsx # 會計科目維護頁面
+│       │   ├── ShipList.jsx         # ★ 出貨單列表頁（`/trade/shipment`，篩選/狀態，點列開新增/編輯彈窗——本身不是路由頁面）
 │       │   ├── DataDictMaster.jsx   # 資料字典維護頁面（主檔 + 欄位定義）
 │       │   ├── SysReportMaster.jsx  # 系統報表定義維護頁面
 │       │   └── MssqlMigrate.jsx     # ★「MSSQL 資料轉入 PostgreSQL」頁面（系統設定分類下）
 │       └── components/
 │           ├── CustomerFormModal.jsx      # 新增/編輯客戶 Modal
+│           ├── SupplierFormModal.jsx      # 新增/編輯廠商 Modal
+│           ├── ProductFormModal.jsx       # 新增/編輯產品 Modal（現有庫存量/現行成本唯讀顯示）
+│           ├── EmployeeFormModal.jsx      # 新增/編輯員工 Modal（含確認密碼欄位）
+│           ├── CarFormModal.jsx           # 新增/編輯車輛 Modal（dayjs 日期欄位）
+│           ├── AcntAccountFormModal.jsx   # 新增/編輯會計科目 Modal（科目類別下拉選單、科目編號格式驗證）
+│           ├── ShipFormModal.jsx          # ★ 出貨單新增/編輯彈窗（可拖曳+可縮放，比照 Delphi6ERP 原畫面：表頭/表尾固定高度、品項表格撐滿剩餘空間並自帶捲軸）
 │           ├── CustomerReport.jsx         # Stimulsoft 報表設計器/預覽 Modal（localStorage 版面）
 │           ├── CustomerReportPreview.jsx  # Stimulsoft 純預覽 Modal（載入 .mrt 檔）
 │           ├── DataDictFormModal.jsx      # 新增/編輯資料字典主檔 Modal
@@ -175,8 +206,9 @@ Password: erpuser
 
 | 分類 | 資料表 | 資料來源 |
 |--------|------|---------|
-| 基本資料（4） | `tbl_customer`／`tbl_supplier`／`tbl_product`／`tbl_employe` | **Delphi6ERP（MSSQL）真實資料**，見〈搬移 Delphi6ERP 業務資料〉 |
-| 交易/庫存/總帳（21） | `tbl_ship`／`tbl_ship_dt`／`tbl_po_recv`／`tbl_po_recv_dt`／`tbl_ar_recv`／`tbl_ar_recv_dt`／`tbl_ap_pay`／`tbl_ap_pay_dt`／`tbl_inv_adj`／`tbl_inv_adj_dt`／`tbl_inventory`／`tbl_inv_onhand`／`tbl_transaction`／`tbl_car`／`tbl_acnt_account`／`tbl_acnt_type`／`tbl_acnt_journal`／`tbl_acnt_journal_dt`／`tbl_acnt_init`／`tbl_sys_param`／`tbl_his_ship`／`tbl_his_ship_dt`／`tbl_his_po_recv`／`tbl_his_po_recv_dt`／`tbl_fld_for_edit` | 同上，**Delphi6ERP（MSSQL）真實資料**（後端目前還沒有對應的功能頁面，屬於〈待開發功能〉） |
+| 主檔資訊（7，已有功能頁面） | `tbl_customer`／`tbl_supplier`／`tbl_product`／`tbl_employe`／`tbl_car`／`tbl_acnt_account`／`tbl_acnt_type` | **Delphi6ERP（MSSQL）真實資料**，見〈搬移 Delphi6ERP 業務資料〉；`tbl_acnt_type`（科目類別）沒有獨立維護頁面，只在會計科目表單當下拉選單資料來源 |
+| 交易/庫存/總帳（18，還沒有功能頁面） | `tbl_ship`／`tbl_ship_dt`／`tbl_po_recv`／`tbl_po_recv_dt`／`tbl_ar_recv`／`tbl_ar_recv_dt`／`tbl_ap_pay`／`tbl_ap_pay_dt`／`tbl_inv_adj`／`tbl_inv_adj_dt`／`tbl_inventory`／`tbl_inv_onhand`／`tbl_transaction`／`tbl_acnt_journal`／`tbl_acnt_journal_dt`／`tbl_acnt_init`／`tbl_sys_param`／`tbl_fld_for_edit` | 同上，**Delphi6ERP（MSSQL）真實資料**（後端目前還沒有對應的功能頁面，屬於〈待開發功能〉） |
+| 歷史單據（4，還沒有功能頁面） | `tbl_his_ship`／`tbl_his_ship_dt`／`tbl_his_po_recv`／`tbl_his_po_recv_dt` | 同上，**Delphi6ERP（MSSQL）真實資料**；客戶/供應商/產品/員工的「編號變更」後端 API 會更新這幾張表的外鍵，其餘功能尚未開發 |
 | 資料字典（2） | `tbldd`／`tbl_ddfield` | Oracle 測試資料（`migrate_oracle_to_pg.py`），已上線使用中 |
 | 系統報表引擎（2） | `tblsysreport`／`tblsysreportfield` | **Delphi6ERP（MSSQL）真實資料**（52 份報表、144 個查詢欄位），透過 `.claude/skills/import-sysreport` 匯入 |
 
@@ -733,6 +765,18 @@ npm install
   - [x] 產品的 `prd_onhand`/`prd_cur_cost` 維持唯讀（系統維護欄位，之後成本作業模組才會更新）；員工密碼沿用明碼儲存（尚無登入系統）
   - [x] 後端 5 個模組（客戶/供應商/產品/員工/車輛）額外提供 `PUT /{id}/renumber`（比照各自 Delphi `Modify_NO` 程序：新編號複製一筆、串接更新所有關聯明細表外鍵、刪除舊編號，整個包在一個交易裡——Postgres 這幾張表都設了 FK `ON UPDATE RESTRICT`，不能直接改主鍵，這個交易順序是必要的不是舊系統的隨意選擇），**但目前列表+Modal 畫面沒有任何按鈕呼叫它**，是預留給以後要在列表畫面加「編號變更」動作時用的。會計科目沒有這個端點：舊系統的 `form_account.pas` 雖然宣告了 `ActEditNo` 動作但從未指定 `OnExecute`，照實不做
   - 範圍排除（未列入這次移植）：報表列印（Stimulsoft 設計器/預覽，客戶主檔已有、其餘 5 個模組還沒有對應 `.mrt` 報表定義）
+- [x] 出貨單（銷貨/銷退）維護——第一個交易單據模組，比照 Delphi6ERP `form_ship.pas`（1568 行）+ `erp_public.pas` 的成本/過帳邏輯完整移植
+  - [x] **畫面模式：列表頁 + 新增/編輯彈窗**（`/trade/shipment` 唯一路由；點列或「新增出貨單」開 `ShipFormModal`，不是另開路由頁面）。彈窗**可拖曳＋可縮放**（`react-draggable`+`react-resizable`，比照 antd 官方可拖曳 Modal 範例），內部用 flex 版面比照 Delphi6ERP 原畫面：表頭（客戶/日期/憑證編號/送貨地址/發票號碼）與表尾（業務員/送貨員/車輛/備註/未稅稅額合計/工具列按鈕）固定高度，中間品項表格 `flex:1` 撐滿縮放後的剩餘空間，超出可視範圍時捲軸在表格本身（antd `Table` 的 `scroll.y` 動態量測表頭/表尾高度後算出剩餘可用高度）。新增單據存檔成功後**留在同一個彈窗**內切換成檢視模式（不關閉），比照舊系統存檔後still在同一視窗可以馬上按確認的行為。「客戶」「業務員」「送貨員」「車輛」用單一下拉搜尋框同時顯示代碼+名稱，沒有像原畫面拆成兩個獨立欄位
+  - [x] **新增品項改用資料字典（`DDLookup.getDDLookup('TBL_PRODUCT')`）多選挑選器**，一次選多筆產品各自帶出目前單位/庫存量/客戶歷史單價後加成多筆品項列，比照 Delphi6ERP `gridPRD_NOButtonClick`→`SelectPrdNo`→`AddProd` 迴圈的行為（一次挑選、一次全部帶入）；已選品項的產品/名稱/單位/現有數量唯讀顯示，只有數量/單價可編輯，比照原畫面 grid 的 PRD_NO 欄位一樣不能直接改品項的產品（要改就刪掉重選）
+  - [x] 新增/修改/刪除（僅未確認狀態可操作）/確認(過帳)/取消確認
+  - [x] **移動平均成本引擎**：`backend/services/inventory.py` 的 `insert_transaction`/`update_transaction`/`delete_transactions_and_recalc`，逐字比照 `erp_public.pas` 的 `InsertTransaction`/`UpdateTransaction`——從異動時間點開始，往後重算該產品所有交易的結存量與移動平均成本，出貨用當下平均成本入帳、進貨/正向調整才會重新計算平均成本。同一套引擎之後 PO_RECV／INV_ADJ 也要共用，不要重寫
+  - [x] **應收帳款自動過帳**：`backend/services/accounting.py` 的 `insert_journal`/`insert_journal_line`/`chk_dc_balance`/`delete_journal`，確認出貨單時依銷貨/銷退/折讓自動拆分過帳到 `tbl_acnt_journal`，取消確認時連同刪除傳票；借貸不平衡會直接丟例外擋下來（`chk_dc_balance`）
+  - [x] 快速收款：從出貨單直接帶出未清帳款，一次輸入現金/票據/折讓，建立 `tbl_ar_recv`＋`tbl_ar_recv_dt` 並自動過帳；收款後不可取消確認（比照舊系統 `Chk_AR_Received` 檢查）
+  - [x] 歷史查詢：該客戶過去出貨紀錄——`tbl_his_ship`／`tbl_his_ship_dt` 目前是空的（舊系統實際上沒在用歸檔機制），直接查 `tbl_ship` 就等於現在的實際行為
+  - [x] 單號產生：`backend/services/numbering.py` 的 `next_code`，逐字比照 `DBUty.pas` 的 `GetNumbericCode`（`yyyymmdd`+補零序號，同一天內連續遞增）
+  - [x] 用 `SELECT ... FOR UPDATE` 鎖定單頭列來處理確認/取消確認/刪除的併發，比舊系統用「重新查一次比對狀態」的樂觀鎖檢查（`ChkStatusModified`）更直接可靠
+  - 範圍排除（未列入這次移植，disclosed）：列印（舊系統對應 4 份 ReportBuilder 樣板，沒有對應的 Stimulsoft 樣板）；正式的歷史單據封存機制（沿用查即時資料的簡化做法）；新增品項時「複製既有記錄欄位值」的挑選器捷徑（`SelectXxxNO`）；查詢畫面簡化成單一關鍵字，不是逐欄位動態 WHERE/ORDER 產生器
+  - **實測**：對 548 筆真實出貨單/6133 筆真實成本流水帳/531 筆真實收款資料跑過完整生命週期（新增→確認→快速收款→驗證 GL 借貸平衡與成本重算→清除測試資料還原基準值），資料庫最終筆數與產品庫存/成本狀態都跟測試前一致
 
 ---
 
@@ -741,7 +785,7 @@ npm install
 > 以下功能的**資料庫表跟真實資料已經在 `erp` 裡了**（Delphi6ERP／MSSQL 遷移過來的 29 張業務表，見〈資料庫〉章節），
 > 缺的是後端 API 與前端頁面。
 
-- [ ] 交易單據維護（訂單 / 出貨單 `tbl_ship`／`tbl_ship_dt` / 進貨單 `tbl_po_recv`／`tbl_po_recv_dt` / 應收 `tbl_ar_recv` / 應付 `tbl_ap_pay` / 雜收發單據，見 `menuConfig.js` 的 `trade` 分類）
+- [ ] 交易單據維護其餘部分（訂單 / 進貨單 `tbl_po_recv`／`tbl_po_recv_dt` / 應收帳款收款維護（目前只有出貨單內建的快速收款，沒有獨立的應收帳款頁面）/ 應付 `tbl_ap_pay` / 雜收發單據，見 `menuConfig.js` 的 `trade` 分類；出貨單已完成，見〈已完成功能〉。移動平均成本引擎（`backend/services/inventory.py`）與 GL 過帳輔助（`backend/services/accounting.py`）已經是共用模組，進貨單/雜收發單據記得重用不要重寫）
 - [ ] 管理報表（應付/應收帳款統計表、明細表，見 `report` 分類；`ST_RPT_*`/`MG_*` 等對應報表定義已從 Delphi6ERP 匯入 `tblsysreport`，可以直接用系統報表模組承接，不一定要另外寫頁面）
 - [ ] 會計總帳系統（傳票維護 `tbl_acnt_journal`／`tbl_acnt_journal_dt`、損益表、資產負債表，見 `gl` 分類；會計科目主檔已完成，見〈已完成功能〉）
 - [ ] 成本作業（期間維護，見 `cost` 分類；庫存移動平均成本流水帳 `tbl_transaction` 資料已就緒，重算邏輯要參考 Delphi6ERP `erp_public.pas` 的 `InsertTransaction`/`UpdateTransaction` 重新實作，注意併發寫入下的成本重算正確性；會計年度結轉 `Form_AcntChgYear.pas` 也歸在系統模組範疇，見下一項）

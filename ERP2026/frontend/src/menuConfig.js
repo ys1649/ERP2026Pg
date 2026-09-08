@@ -52,7 +52,7 @@ export const menuTree = [
     icon: ShoppingCartOutlined,
     children: [
       { key: 'trade-order', label: '訂單維護', path: '/trade/order', icon: FileTextOutlined },
-      { key: 'trade-shipment', label: '出貨單', path: '/trade/shipment', icon: CarOutlined },
+      { key: 'trade-shipment', label: '出貨單', path: '/trade/shipment', icon: CarOutlined, ready: true },
       { key: 'trade-purchase', label: '進貨單', path: '/trade/purchase', icon: ImportOutlined },
       { key: 'trade-receivable', label: '應收帳款維護', path: '/trade/receivable', icon: DollarOutlined },
       { key: 'trade-payable', label: '應付帳款維護', path: '/trade/payable', icon: WalletOutlined },

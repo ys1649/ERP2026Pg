@@ -14,6 +14,7 @@ from routers import (
     employees,
     cars,
     acnt_accounts,
+    ship,
 )
 
 LOG_FILE = Path(__file__).resolve().parent / "uvicorn_8000.log"
@@ -44,6 +45,7 @@ app.include_router(products.router, prefix="/api/products", tags=["products"])
 app.include_router(employees.router, prefix="/api/employees", tags=["employees"])
 app.include_router(cars.router, prefix="/api/cars", tags=["cars"])
 app.include_router(acnt_accounts.router, prefix="/api/acnt-accounts", tags=["acnt-accounts"])
+app.include_router(ship.router, prefix="/api/ship", tags=["ship"])
 
 if __name__ == "__main__":
     import uvicorn
