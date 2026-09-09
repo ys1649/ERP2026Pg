@@ -8,6 +8,7 @@ export const sysReportApi = {
   create: (data) => api.post('/sysreport', data),
   update: (srpId, data) => api.put(`/sysreport/${srpId}`, data),
   remove: (srpId) => api.delete(`/sysreport/${srpId}`),
+  copy: (srpId, data) => api.post(`/sysreport/${srpId}/copy`, data),
 
   getReportFile: (srpId) => api.get(`/sysreport/${srpId}/reportfile`),
   saveReportFile: (srpId, srpReportfile) =>
@@ -28,11 +29,12 @@ export const sysReportApi = {
     if (orderby) params.set('orderby', JSON.stringify(orderby))
     return `/api/sysreport/${srpId}/query?${params.toString()}`
   },
-  runQuery: (srpId, criteria, orderby) =>
+  runQuery: (srpId, criteria, orderby, limit) =>
     api.get(`/sysreport/${srpId}/query`, {
       params: {
         criteria: criteria ? JSON.stringify(criteria) : undefined,
         orderby: orderby ? JSON.stringify(orderby) : undefined,
+        limit: limit || undefined,
       },
     }),
 }

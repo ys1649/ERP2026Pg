@@ -351,11 +351,12 @@ python -m uvicorn main:app --reload --port 8000
 
 | Method | 路徑 | 說明 |
 |--------|------|------|
-| GET | `/api/sysreport` | 分頁查詢主檔（關鍵字比對編號/名稱） |
+| GET | `/api/sysreport` | 查詢主檔（關鍵字比對編號/名稱，不分頁，回傳全部符合的資料） |
 | GET | `/api/sysreport/{srp_id}` | 取得單筆主檔 |
 | POST | `/api/sysreport` | 新增主檔（201，SRP_SELECT 需為單一 SELECT，SRP_CODE 唯一） |
 | PUT | `/api/sysreport/{srp_id}` | 更新主檔 |
 | DELETE | `/api/sysreport/{srp_id}` | 刪除主檔（會先刪除底下的查詢欄位） |
+| POST | `/api/sysreport/{srp_id}/copy` | 複製主檔（含 SRP_REPORTFILE 版面）與底下所有查詢欄位，201，SRP_CODE 另外指定且需唯一 |
 | GET | `/api/sysreport/{srp_id}/reportfile` | 取得報表版面 JSON（`SRP_REPORTFILE`） |
 | PUT | `/api/sysreport/{srp_id}/reportfile` | 儲存報表版面 JSON |
 | GET | `/api/sysreport/{srp_id}/select-columns` | 執行 `SRP_SELECT+WHERE(強制1=2)+GROUPBY+ORDERBY` 列出真實可選欄位，供新增查詢欄位時的「選欄位」picker 用 |

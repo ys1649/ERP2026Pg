@@ -1,23 +1,23 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Card, Table, Button, Space, Input, Form, Row, Col, Popconfirm, message, Tag, Typography } from 'antd'
 import {
   SearchOutlined, PlusOutlined, EditOutlined, DeleteOutlined, ReloadOutlined,
-  UnorderedListOutlined, BuildOutlined, ExperimentOutlined,
+  UnorderedListOutlined, BuildOutlined, ExperimentOutlined, CopyOutlined,
 } from '@ant-design/icons'
 import { sysReportApi } from '../api/sysreport'
 import SysReportFormModal from '../components/SysReportFormModal'
+import SysReportCopyModal from '../components/SysReportCopyModal'
 import SysReportFieldMaintModal from '../components/SysReportFieldMaintModal'
-import SysReportDesigner from '../components/SysReportDesigner'
 import { SysReportQueryModal } from '../components/SysReportQuery'
 
 const { Title, Text } = Typography
 
 export default function SysReportMaster() {
+  const navigate = useNavigate()
   const [form] = Form.useForm()
   const [data, setData] = useState([])
   const [total, setTotal] = useState(0)
-  const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(20)
   const [tableLoading, setTableLoading] = useState(false)
   const [searchParams, setSearchParams] = useState({})
 
@@ -25,15 +25,18 @@ export default function SysReportMaster() {
   const [editRecord, setEditRecord] = useState(null)
   const [formLoading, setFormLoading] = useState(false)
 
+  const [copyOpen, setCopyOpen] = useState(false)
+  const [copyRecord, setCopyRecord] = useState(null)
+  const [copyLoading, setCopyLoading] = useState(false)
+
   const [fieldMaintOpen, setFieldMaintOpen] = useState(false)
-  const [designerOpen, setDesignerOpen] = useState(false)
   const [testOpen, setTestOpen] = useState(false)
   const [activeRecord, setActiveRecord] = useState(null)
 
-  const fetchData = useCallback(async (params = searchParams, pg = page, ps = pageSize) => {
+  const fetchData = useCallback(async (params = searchParams) => {
     setTableLoading(true)
     try {
-      const res = await sysReportApi.list({ ...params, page: pg, page_size: ps })
+      const res = await sysReportApi.list(params)
       setData(res.data.data)
       setTotal(res.data.total)
     } catch {
@@ -41,22 +44,20 @@ export default function SysReportMaster() {
     } finally {
       setTableLoading(false)
     }
-  }, [searchParams, page, pageSize])
+  }, [searchParams])
 
   useEffect(() => { fetchData() }, [fetchData])
 
   const handleSearch = (values) => {
     const params = { q: values.q?.trim() || undefined }
     setSearchParams(params)
-    setPage(1)
-    fetchData(params, 1, pageSize)
+    fetchData(params)
   }
 
   const handleReset = () => {
     form.resetFields()
     setSearchParams({})
-    setPage(1)
-    fetchData({}, 1, pageSize)
+    fetchData({})
   }
 
   const openCreate = () => { setEditRecord(null); setFormOpen(true) }
@@ -81,6 +82,22 @@ export default function SysReportMaster() {
     }
   }
 
+  const openCopy = (record) => { setCopyRecord(record); setCopyOpen(true) }
+
+  const handleCopyOk = async (values) => {
+    setCopyLoading(true)
+    try {
+      await sysReportApi.copy(copyRecord.srp_id, values)
+      message.success('複製成功')
+      setCopyOpen(false)
+      fetchData()
+    } catch (err) {
+      message.error(err.response?.data?.detail || '複製失敗')
+    } finally {
+      setCopyLoading(false)
+    }
+  }
+
   const handleDelete = async (srpId) => {
     try {
       await sysReportApi.remove(srpId)
@@ -97,18 +114,19 @@ export default function SysReportMaster() {
       render: (v) => <Tag color="blue">{v}</Tag>,
     },
     { title: '報表名稱', dataIndex: 'srp_name', key: 'srp_name', width: 200 },
-    { title: '報表說明', dataIndex: 'srp_description', key: 'srp_description', ellipsis: true },
+    { title: '報表說明', dataIndex: 'srp_description', key: 'srp_description', width: 140, ellipsis: true },
     {
-      title: '操作', key: 'action', width: 320, fixed: 'right',
+      title: '操作', key: 'action', width: 380,
       render: (_, record) => (
         <Space size={4}>
           <Button type="link" size="small" icon={<UnorderedListOutlined />}
             onClick={() => { setActiveRecord(record); setFieldMaintOpen(true) }}>查詢欄位</Button>
           <Button type="link" size="small" icon={<BuildOutlined />}
-            onClick={() => { setActiveRecord(record); setDesignerOpen(true) }}>設計</Button>
+            onClick={() => navigate(`/system/report/design/${record.srp_id}`)}>設計</Button>
           <Button type="link" size="small" icon={<ExperimentOutlined />}
             onClick={() => { setActiveRecord(record); setTestOpen(true) }}>測試</Button>
           <Button type="link" size="small" icon={<EditOutlined />} onClick={() => openEdit(record)}>編輯</Button>
+          <Button type="link" size="small" icon={<CopyOutlined />} onClick={() => openCopy(record)}>複製</Button>
           <Popconfirm
             title={`確定刪除「${record.srp_name}」？`}
             okText="刪除" cancelText="取消" okButtonProps={{ danger: true }}
@@ -162,16 +180,7 @@ export default function SysReportMaster() {
           dataSource={data}
           loading={tableLoading}
           size="small"
-          scroll={{ x: 900 }}
-          pagination={{
-            current: page,
-            pageSize,
-            total,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (t) => `共 ${t} 筆`,
-            onChange: (p, ps) => { setPage(p); setPageSize(ps); fetchData(searchParams, p, ps) },
-          }}
+          pagination={false}
         />
       </Card>
 
@@ -183,16 +192,18 @@ export default function SysReportMaster() {
         onCancel={() => setFormOpen(false)}
       />
 
+      <SysReportCopyModal
+        open={copyOpen}
+        record={copyRecord}
+        loading={copyLoading}
+        onOk={handleCopyOk}
+        onCancel={() => setCopyOpen(false)}
+      />
+
       <SysReportFieldMaintModal
         open={fieldMaintOpen}
         report={activeRecord}
         onCancel={() => setFieldMaintOpen(false)}
-      />
-
-      <SysReportDesigner
-        open={designerOpen}
-        report={activeRecord}
-        onClose={() => setDesignerOpen(false)}
       />
 
       <SysReportQueryModal

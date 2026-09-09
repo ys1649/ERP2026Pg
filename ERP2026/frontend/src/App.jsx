@@ -11,6 +11,7 @@ import AcntAccountMaster from './pages/AcntAccountMaster'
 import ShipList from './pages/ShipList'
 import DataDictMaster from './pages/DataDictMaster'
 import SysReportMaster from './pages/SysReportMaster'
+import SysReportDesignerPage from './pages/SysReportDesignerPage'
 import MssqlMigrate from './pages/MssqlMigrate'
 import { flatMenuItems } from './menuConfig'
 
@@ -36,6 +37,7 @@ export default function App() {
           const Component = readyComponents[item.path] || Placeholder
           return <Route key={item.path} path={item.path} element={<Component />} />
         })}
+        <Route path="/system/report/design/:srpId" element={<SysReportDesignerPage />} />
       </Route>
     </Routes>
   )

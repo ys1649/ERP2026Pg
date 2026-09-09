@@ -31,6 +31,11 @@ class SysReportUpdate(SysReportCreate):
     pass
 
 
+class SysReportCopyRequest(BaseModel):
+    srp_code: str
+    srp_name: str
+
+
 class ReportFileUpdate(BaseModel):
     srp_reportfile: str
 
@@ -96,11 +101,8 @@ def _validate_field_vocab(data):
 
 
 @router.get("")
-def list_reports(
-    q: Optional[str] = Query(None, description="搜尋報表編號/名稱"),
-    page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=500),
-):
+def list_reports(q: Optional[str] = Query(None, description="搜尋報表編號/名稱")):
+    """查詢主檔，不分頁，回傳全部符合的資料。"""
     with get_conn() as conn:
         cur = conn.cursor()
         where = ""
@@ -110,19 +112,14 @@ def list_reports(
             pq = f"%{q.strip()}%"
             params = {"q1": pq, "q2": pq}
 
-        cur.execute(f"SELECT COUNT(*) FROM TBLSYSREPORT {where}", params)
-        total = cur.fetchone()[0]
-
-        offset = (page - 1) * page_size
         cur.execute(
             f"""SELECT SRP_ID,SRP_CODE,SRP_NAME,SRP_DESCRIPTION,SRP_SELECT,SRP_WHERE,SRP_GROUPBY,SRP_ORDERBY
                   FROM TBLSYSREPORT {where}
-                 ORDER BY SRP_ID
-                OFFSET %(offset)s ROWS FETCH NEXT %(lim)s ROWS ONLY""",
-            {**params, "offset": offset, "lim": page_size},
+                 ORDER BY SRP_ID""",
+            params,
         )
         rows = [row_to_dict(cur, r) for r in cur.fetchall()]
-        return {"total": total, "page": page, "page_size": page_size, "data": rows}
+        return {"total": len(rows), "data": rows}
 
 
 @router.get("/{srp_id}")
@@ -192,6 +189,59 @@ def delete_report(srp_id: int):
         if cur.rowcount == 0:
             raise HTTPException(404, "系統報表不存在")
         return {"message": "刪除成功"}
+
+
+@router.post("/{srp_id}/copy", status_code=201)
+def copy_report(srp_id: int, data: SysReportCopyRequest):
+    """複製主檔（含 SRP_REPORTFILE 版面）與底下所有查詢欄位，SRP_CODE/SRP_NAME 另外指定。"""
+    with get_conn() as conn:
+        cur = conn.cursor()
+        cur.execute(
+            """SELECT SRP_DESCRIPTION,SRP_SELECT,SRP_WHERE,SRP_GROUPBY,SRP_ORDERBY,SRP_REPORTFILE
+                 FROM TBLSYSREPORT WHERE SRP_ID=%(id)s""",
+            {"id": srp_id},
+        )
+        row = cur.fetchone()
+        if not row:
+            raise HTTPException(404, "系統報表不存在")
+        description, select_sql, where_sql, groupby_sql, orderby_sql, reportfile = row
+
+        cur.execute("SELECT COALESCE(MAX(SRP_ID), 0) + 1 FROM TBLSYSREPORT")
+        next_id = cur.fetchone()[0]
+        try:
+            cur.execute(
+                """INSERT INTO TBLSYSREPORT
+                       (SRP_ID,SRP_CODE,SRP_NAME,SRP_DESCRIPTION,SRP_SELECT,SRP_WHERE,SRP_GROUPBY,SRP_ORDERBY,SRP_REPORTFILE)
+                   VALUES (%(srp_id)s,%(srp_code)s,%(srp_name)s,%(srp_description)s,%(srp_select)s,%(srp_where)s,%(srp_groupby)s,%(srp_orderby)s,%(srp_reportfile)s)""",
+                {
+                    "srp_id": next_id,
+                    "srp_code": data.srp_code,
+                    "srp_name": data.srp_name,
+                    "srp_description": description,
+                    "srp_select": select_sql,
+                    "srp_where": where_sql,
+                    "srp_groupby": groupby_sql,
+                    "srp_orderby": orderby_sql,
+                    "srp_reportfile": reportfile,
+                },
+            )
+        except Exception as e:
+            if "ak_srp_code" in str(e).lower() or "srp_code" in str(e).lower():
+                raise HTTPException(409, "報表編號已存在")
+            raise
+
+        cur.execute(
+            """INSERT INTO TBLSYSREPORTFIELD
+                   (SRP_ID,SRF_SEQNO,SRF_FIELDNAME,SRF_TABLEALIAS,SRF_DISPNAME,SRF_DISPORDER,
+                    SRF_DATATYPE,SRF_CONTROLTYPE,SRF_QUERYTYPE,SRF_ISMUSTCRITERIA,SRF_ISWHERE,
+                    SRF_ISSORT,SRF_SORTDEC,SRF_LIST_VALUE,SRF_LIST_SQL,SRF_LIST_RETURNFIELD,SRF_LIST_FIELDDISP)
+               SELECT %(new_id)s,SRF_SEQNO,SRF_FIELDNAME,SRF_TABLEALIAS,SRF_DISPNAME,SRF_DISPORDER,
+                      SRF_DATATYPE,SRF_CONTROLTYPE,SRF_QUERYTYPE,SRF_ISMUSTCRITERIA,SRF_ISWHERE,
+                      SRF_ISSORT,SRF_SORTDEC,SRF_LIST_VALUE,SRF_LIST_SQL,SRF_LIST_RETURNFIELD,SRF_LIST_FIELDDISP
+                 FROM TBLSYSREPORTFIELD WHERE SRP_ID=%(old_id)s""",
+            {"new_id": next_id, "old_id": srp_id},
+        )
+        return {"message": "複製成功", "srp_id": next_id}
 
 
 # ── 報表 Layout（Stimulsoft Designer）─────────────────────────
@@ -465,6 +515,7 @@ def run_query(
     srp_id: int,
     criteria: Optional[str] = Query(None, description="JSON 陣列：[{srf_seqno,value|value_from,value_to|values}]"),
     orderby: Optional[str] = Query(None, description="JSON 陣列：[{field,dir}]"),
+    limit: Optional[int] = Query(None, ge=1, le=1000, description="限制回傳筆數，供 Designer 抓欄位結構/預覽用"),
 ):
     with get_conn() as conn:
         cur = conn.cursor()
@@ -550,6 +601,9 @@ def run_query(
         main_order = _join_order(base_orderby, order_clause)
 
         final_sql = f"{select_sql} {main_where} {groupby_sql or ''} {main_order}"
+        if limit:
+            final_sql += " LIMIT %(_limit)s"
+            binds["_limit"] = limit
         logger.info("系統報表查詢 SRP_ID=%s 最終 SQL: %s", srp_id, final_sql)
 
         try:
