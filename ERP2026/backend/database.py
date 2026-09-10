@@ -4,7 +4,7 @@ import psycopg
 
 HOST = "localhost"
 PORT = 5432
-DBNAME = "erp"
+DBNAME = "erp2"
 USER = "erpuser"
 PASSWORD = "erpuser"
 
