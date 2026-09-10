@@ -1,6 +1,6 @@
 # ERP2026 進銷存系統 — 開發文件
 
-> 最後更新：2026-09-07（主檔資訊補齊供應商/產品/員工/車輛/會計科目 5 個模組，均為列表+Modal CRUD；詳見〈目錄結構〉〈已完成功能〉章節）
+> 最後更新：2026-09-10（新增系統備份與還原功能，`/system/backup`，`pg_dump`/`psql` 包裝；詳見〈目錄結構〉〈已完成功能〉章節）
 
 ---
 
@@ -100,7 +100,8 @@ ERP2026/
 │       ├── reports.py       # 報表檔案列表 + 下載 API（no-cache）
 │       ├── data_dict.py     # 資料字典主檔/欄位 CRUD + Lookup meta/data API
 │       ├── sysreport.py     # 系統報表主檔/欄位 CRUD + 動態查詢引擎（比照 Delphi6ERP 動態組 WHERE/ORDER BY）+ 版面讀寫
-│       └── mssql_migrate.py # ★「MSSQL 資料轉入 PostgreSQL」網頁功能：使用者輸入 MSSQL 連線資訊，只搬資料不動 DDL，排除 4 張報表引擎表
+│       ├── mssql_migrate.py # ★「MSSQL 資料轉入 PostgreSQL」網頁功能：使用者輸入 MSSQL 連線資訊，只搬資料不動 DDL，排除 4 張報表引擎表
+│       └── backup.py        # ★「系統備份與還原」：GET /export 用 pg_dump --clean --if-exists 匯出單一 .sql 檔；POST /restore 上傳還原，還原前自動於伺服器留一份安全備份，psql --single-transaction 執行（失敗整個 rollback）
 │
 ├── .claude/
 │   └── skills/
@@ -140,7 +141,8 @@ ERP2026/
 │       │   ├── reports.js       # reportApi：listCustomer / customerReportUrl（含 cache-buster）
 │       │   ├── datadict.js      # dataDictApi：主檔/欄位 CRUD、meta、data
 │       │   ├── sysreport.js     # sysReportApi：主檔/欄位 CRUD、selectColumns、fieldLookupData、query-meta、runQuery
-│       │   └── mssqlMigrate.js  # mssqlMigrateApi：test / run（「MSSQL 資料轉入 PostgreSQL」頁面用）
+│       │   ├── mssqlMigrate.js  # mssqlMigrateApi：test / run（「MSSQL 資料轉入 PostgreSQL」頁面用）
+│       │   └── backup.js        # backupApi：export（blob 下載）/ restore（multipart 上傳）
 │       ├── lib/
 │       │   └── ddLookup.jsx     # ★ DDLookup.getDDLookup(ddmNo)：呼叫式 Promise API，動態掛載/卸載
 │       ├── theme.js             # antd ConfigProvider 的 locale/theme 設定（main.jsx 與 ddLookup.jsx 共用）
@@ -158,7 +160,8 @@ ERP2026/
 │       │   ├── ShipList.jsx         # ★ 出貨單列表頁（`/trade/shipment`，篩選/狀態，點列開新增/編輯彈窗——本身不是路由頁面）
 │       │   ├── DataDictMaster.jsx   # 資料字典維護頁面（主檔 + 欄位定義）
 │       │   ├── SysReportMaster.jsx  # 系統報表定義維護頁面
-│       │   └── MssqlMigrate.jsx     # ★「MSSQL 資料轉入 PostgreSQL」頁面（系統設定分類下）
+│       │   ├── MssqlMigrate.jsx     # ★「MSSQL 資料轉入 PostgreSQL」頁面（系統設定分類下）
+│       │   └── SystemBackup.jsx     # ★「系統備份與還原」頁面：備份下載 + 拖拉上傳還原（需輸入「確認還原」文字才能送出）
 │       └── components/
 │           ├── CustomerFormModal.jsx      # 新增/編輯客戶 Modal
 │           ├── SupplierFormModal.jsx      # 新增/編輯廠商 Modal
@@ -247,6 +250,17 @@ python migrate_mssql_to_pg.py
 - **跟 `migrate_mssql_to_pg.py` 的關鍵差異：這個功能只搬資料，不動 DDL**——目標 Postgres 表要先用 PowerDesigner 之類的工具建好，程式只會 `TRUNCATE` 跟 MSSQL 同名的表再匯入，動態抓「MSSQL 有、Postgres 也有」的同名表跟欄位交集，`tbldd`/`tbl_ddfield`/`tblsysreport`/`tblsysreportfield` 永遠排除
 - MSSQL 連線資訊由使用者在畫面上輸入（伺服器/連接埠/資料庫/帳密），不落地儲存；PostgreSQL 端固定用系統既有連線設定
 - 「開始搬移」有二次確認 Modal，因為會 TRUNCATE 覆蓋現有資料
+
+### 系統備份與還原（`/system/backup` 網頁功能）
+
+比照舊系統 Delphi6ERP「系統設定(Y)」選單的資料備份/資料還原（`Form_backup.pas`/`form_DataRestore.pas`），但底層機制改用 PostgreSQL 原生工具，不沿用舊系統「逐表存 ADO XML + WinRAR 打包、還原時呼叫 `.BAT`+`isql` 重跑 DDL script、完全沒有交易保護」的做法：
+
+- 後端：`backend/routers/backup.py`（`GET /api/backup/export`、`POST /api/backup/restore`）
+- 前端：`frontend/src/pages/SystemBackup.jsx`（系統設定 → 系統備份與還原）
+- **匯出**：`pg_dump -F p --no-owner --no-privileges --clean --if-exists` 把整個資料庫（結構+資料）匯出成單一 `.sql` 純文字檔提供下載。`--clean --if-exists` 讓檔案內容自帶 `DROP TABLE IF EXISTS`+`CREATE TABLE`，對應「還原時重建所有 Table」的需求
+- **還原**：使用者上傳 `.sql` 檔案後，後端會先**自動在伺服器留一份還原前的安全備份**（存到 `backend/scripts/backups/pre_restore_{timestamp}.sql`，沿用舊系統「還原前一定先備份」的慣例），再用 `psql -v ON_ERROR_STOP=1 --single-transaction` 執行上傳的腳本——**整份腳本包在一個交易裡，任何一步失敗就整個 rollback**，修正舊系統還原中途失敗會留下半殘資料庫的問題
+- 前端還原按鈕需輸入指定確認文字（「確認還原」）才能送出，避免誤觸清空資料庫；目前系統尚無登入權限機制，此功能任何人都能觸發，待日後 auth 模組完成後應重新檢視存取保護
+- 已實測驗證：把 `database.py` 的 `DBNAME` 暫時指向一個空白資料庫（`erp2`），對其執行還原後，33 張表、38 個外鍵約束、以及各表筆數（出貨單/客戶/應收帳款/資料字典）皆與來源 `erp` 完全一致，且全程未動到 `erp` 本身的資料
 
 ### 匯入系統報表定義（`.claude/skills/import-sysreport`）
 
@@ -375,6 +389,13 @@ python -m uvicorn main:app --reload --port 8000
 | POST | `/api/mssql-migrate/test` | 驗證 MSSQL 連線資訊，回傳跟 PostgreSQL 同名可搬移的表清單 |
 | POST | `/api/mssql-migrate/run` | TRUNCATE 目標同名表後從 MSSQL 全量匯入，回傳每張表的搬移筆數 |
 
+#### 系統備份與還原（`/api/backup`，見〈資料庫〉章節）
+
+| Method | 路徑 | 說明 |
+|--------|------|------|
+| GET | `/api/backup/export` | 用 `pg_dump` 匯出整個資料庫為單一 `.sql` 檔並下載 |
+| POST | `/api/backup/restore` | 上傳 `.sql` 備份檔還原；還原前自動於伺服器留一份安全備份，`psql --single-transaction` 執行 |
+
 ### 查詢參數（GET /api/customers）
 
 | 參數 | 說明 |
@@ -425,6 +446,8 @@ proxy: { '/api': { target: 'http://localhost:8000', changeOrigin: true } }
 | `api/datadict.js` | dataDictApi（主檔/欄位 CRUD、autoGenerateFields、getMeta、getData） |
 | `pages/MssqlMigrate.jsx` | 「MSSQL 資料轉入 PostgreSQL」頁面：連線資訊表單、測試連線、二次確認後執行搬移、結果表格 |
 | `api/mssqlMigrate.js` | mssqlMigrateApi（test / run，5 分鐘 timeout） |
+| `pages/SystemBackup.jsx` | 「系統備份與還原」頁面：備份下載按鈕、拖拉上傳＋輸入確認文字才能執行的還原按鈕 |
+| `api/backup.js` | backupApi（export 回傳 blob 觸發下載 / restore 用 multipart 上傳） |
 
 ---
 
@@ -778,6 +801,12 @@ npm install
   - [x] 用 `SELECT ... FOR UPDATE` 鎖定單頭列來處理確認/取消確認/刪除的併發，比舊系統用「重新查一次比對狀態」的樂觀鎖檢查（`ChkStatusModified`）更直接可靠
   - 範圍排除（未列入這次移植，disclosed）：列印（舊系統對應 4 份 ReportBuilder 樣板，沒有對應的 Stimulsoft 樣板）；正式的歷史單據封存機制（沿用查即時資料的簡化做法）；新增品項時「複製既有記錄欄位值」的挑選器捷徑（`SelectXxxNO`）；查詢畫面簡化成單一關鍵字，不是逐欄位動態 WHERE/ORDER 產生器
   - **實測**：對 548 筆真實出貨單/6133 筆真實成本流水帳/531 筆真實收款資料跑過完整生命週期（新增→確認→快速收款→驗證 GL 借貸平衡與成本重算→清除測試資料還原基準值），資料庫最終筆數與產品庫存/成本狀態都跟測試前一致
+- [x] 系統備份與還原（`/system/backup`，詳見〈資料庫〉章節）——第一個系統模組功能，比照 Delphi6ERP「系統設定(Y)」選單的資料備份/資料還原，但底層改用 PostgreSQL 原生工具
+  - [x] 匯出：`pg_dump -F p --clean --if-exists` 產生單一 `.sql` 檔（結構+資料）供下載
+  - [x] 還原：上傳 `.sql` 檔 → 還原前自動於伺服器留一份安全備份 → `psql -v ON_ERROR_STOP=1 --single-transaction` 整包還原（失敗整個 rollback，修正舊系統中途失敗留下半殘資料庫的問題）
+  - [x] 前端還原按鈕需輸入「確認還原」文字才能送出
+  - 已知限制：系統尚無登入權限機制，此功能任何人都能觸發，待 auth 模組完成後應重新檢視存取保護
+  - **實測**：對一個空白資料庫（`erp2`）執行還原，33 張表／38 個外鍵約束／各表筆數皆與來源 `erp` 完全一致，且未動到 `erp` 本身資料
 
 ---
 
@@ -790,7 +819,7 @@ npm install
 - [ ] 管理報表（應付/應收帳款統計表、明細表，見 `report` 分類；`ST_RPT_*`/`MG_*` 等對應報表定義已從 Delphi6ERP 匯入 `tblsysreport`，可以直接用系統報表模組承接，不一定要另外寫頁面）
 - [ ] 會計總帳系統（傳票維護 `tbl_acnt_journal`／`tbl_acnt_journal_dt`、損益表、資產負債表，見 `gl` 分類；會計科目主檔已完成，見〈已完成功能〉）
 - [ ] 成本作業（期間維護，見 `cost` 分類；庫存移動平均成本流水帳 `tbl_transaction` 資料已就緒，重算邏輯要參考 Delphi6ERP `erp_public.pas` 的 `InsertTransaction`/`UpdateTransaction` 重新實作，注意併發寫入下的成本重算正確性；會計年度結轉 `Form_AcntChgYear.pas` 也歸在系統模組範疇，見下一項）
-- [ ] 系統設定其餘項目（功能權限管理、系統資料設定、系統備份與還原、會計年度結轉，見 `system` 分類）
+- [ ] 系統設定其餘項目（功能權限管理、系統資料設定、會計年度結轉，見 `system` 分類；系統備份與還原已完成，見〈已完成功能〉）
 - [ ] 主檔資訊的報表列印（Stimulsoft 設計器/預覽，比照客戶主檔的 `CustomerReport`/`CustomerReportPreview` 模式，供應商/產品/員工/車輛/會計科目目前都還沒有對應 `.mrt` 報表定義與列印按鈕）
 - [ ] 使用者登入 / 權限控管（Delphi6ERP 原本有硬編碼萬用密碼 `WYS`/`WYSEN` 後門，新系統設計登入機制時不要沿用）
 - [ ] 52 份系統報表逐一在 Stimulsoft Designer 重新設計版面（`SRP_REPORTFILE` 目前都是 NULL，ReportBuilder 版面無法自動轉換，見〈匯入系統報表定義〉小節）

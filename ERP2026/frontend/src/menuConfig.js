@@ -84,7 +84,7 @@ export const menuTree = [
       { key: 'system-permission', label: '功能權限管理', path: '/system/permission', icon: SafetyCertificateOutlined },
       { key: 'system-data', label: '系統資料設定', path: '/system/data', icon: DatabaseOutlined },
       { key: 'system-datadict', label: '資料字典維護', path: '/system/datadict', icon: TableOutlined, ready: true },
-      { key: 'system-backup', label: '系統備份與還原', path: '/system/backup', icon: CloudSyncOutlined },
+      { key: 'system-backup', label: '系統備份與還原', path: '/system/backup', icon: CloudSyncOutlined, ready: true },
       { key: 'system-report', label: '系統報表管理', path: '/system/report', icon: PrinterOutlined, ready: true },
       { key: 'system-mssql-migrate', label: 'MSSQL 資料轉入', path: '/system/mssql-migrate', icon: SyncOutlined, ready: true },
     ],
