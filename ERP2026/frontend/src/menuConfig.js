@@ -9,8 +9,6 @@ import {
   DollarOutlined,
   WalletOutlined,
   SwapOutlined,
-  BarChartOutlined,
-  FileSearchOutlined,
   FileDoneOutlined,
   LineChartOutlined,
   PieChartOutlined,
@@ -57,17 +55,6 @@ export const menuTree = [
       { key: 'trade-receivable', label: '應收帳款維護', path: '/trade/receivable', icon: DollarOutlined },
       { key: 'trade-payable', label: '應付帳款維護', path: '/trade/payable', icon: WalletOutlined },
       { key: 'trade-misc', label: '雜收發單據維護', path: '/trade/misc', icon: SwapOutlined },
-    ],
-  },
-  {
-    key: 'report',
-    label: '管理報表',
-    icon: BarChartOutlined,
-    children: [
-      { key: 'report-ap-summary', label: '應付帳款統計表', path: '/report/ap-summary', icon: BarChartOutlined },
-      { key: 'report-ar-summary', label: '應收帳款統計表', path: '/report/ar-summary', icon: BarChartOutlined },
-      { key: 'report-ar-detail', label: '應收帳款明細表', path: '/report/ar-detail', icon: FileSearchOutlined },
-      { key: 'report-ap-detail', label: '應付帳款明細表', path: '/report/ap-detail', icon: FileSearchOutlined },
     ],
   },
   {

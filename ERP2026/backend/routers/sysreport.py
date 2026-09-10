@@ -115,7 +115,7 @@ def list_reports(q: Optional[str] = Query(None, description="搜尋報表編號/
         cur.execute(
             f"""SELECT SRP_ID,SRP_CODE,SRP_NAME,SRP_DESCRIPTION,SRP_SELECT,SRP_WHERE,SRP_GROUPBY,SRP_ORDERBY
                   FROM TBLSYSREPORT {where}
-                 ORDER BY SRP_ID""",
+                 ORDER BY SRP_CODE""",
             params,
         )
         rows = [row_to_dict(cur, r) for r in cur.fetchall()]
@@ -297,7 +297,14 @@ def get_select_columns(srp_id: int):
         select_sql, where_sql, groupby_sql, orderby_sql = row
         select_sql = _validate_select_sql(select_sql)
 
-        forced_where = f"WHERE ({where_sql.strip()}) AND 1=2" if (where_sql or "").strip() else "WHERE 1=2"
+        # SRP_WHERE 跟 run_query 的 _join_where 一樣，存的就是完整的 WHERE 子句
+        # （目前資料庫裡有值的都是「WHERE ...」開頭），這裡只是把它硬包 1=2 讓查詢
+        # 不撈資料、只拿欄位結構，所以要先把開頭的 WHERE 拿掉才能重新包一層括號，
+        # 不然會變成 "WHERE (WHERE ...)" 直接語法錯誤。
+        where_cond = (where_sql or "").strip()
+        if where_cond[:5].upper() == "WHERE":
+            where_cond = where_cond[5:].strip()
+        forced_where = f"WHERE ({where_cond}) AND 1=2" if where_cond else "WHERE 1=2"
         sql = f"{select_sql} {forced_where} {groupby_sql or ''} {orderby_sql or ''}"
         try:
             cur.execute(sql)

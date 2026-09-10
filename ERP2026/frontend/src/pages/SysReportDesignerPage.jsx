@@ -53,10 +53,11 @@ export default function SysReportDesignerPage() {
     const S = window.Stimulsoft
 
     Promise.all([
+      sysReportApi.get(srpId),
       sysReportApi.getReportFile(srpId),
       sysReportApi.runQuery(srpId, null, null, 20).then((res) => ({ ok: true, rows: res.data })).catch((error) => ({ ok: false, error })),
     ])
-      .then(([fileRes, queryResult]) => {
+      .then(([reportRes, fileRes, queryResult]) => {
       if (cancelled) return
       try {
         const options = new S.Designer.StiDesignerOptions()
@@ -77,12 +78,31 @@ export default function SysReportDesignerPage() {
             message.warning('已儲存的報表版面內容毀損，將視為尚未設計版面')
           }
         }
+
+        // 跟 root 一樣，已儲存的版面只保留欄位結構，每次開啟都要重新灌入目前這筆
+        // TBLSYSREPORT 主檔資料，讓 SRP_NAME 等欄位可以拖曳到版面上（比照舊系統 plTemplate）
+        const reportMeta = reportRes.data
+        const metaDataSet = new S.System.Data.DataSet('srpmeta')
+        // 注意：readJson 餵「純陣列」時，Stimulsoft 底層一律把資料表命名為固定的
+        // "root"，不管 DataSet 建構子給的名字是什麼；一定要用 {表名: rows} 包一層，
+        // 否則會跟下面 root 的資料表撞名，Stimulsoft 只好把其中一個改名成 root2，
+        // 且哪個被改名不固定，導致已存版面的欄位綁定時好時壞。
+        metaDataSet.readJson(JSON.stringify({
+          srpmeta: [{
+            srp_id: reportMeta.srp_id,
+            srp_code: reportMeta.srp_code,
+            srp_name: reportMeta.srp_name,
+            srp_description: reportMeta.srp_description,
+          }],
+        }))
+        stiReport.regData('srpmeta', 'srpmeta', metaDataSet, true)
+
         // 已儲存的版面只保留資料來源的欄位結構，不含實際資料列，
         // 每次開啟都要用目前查詢結果重新灌入，Preview 才看得到資料
         const sampleRows = queryResult.ok ? queryResult.rows : null
         if (Array.isArray(sampleRows) && sampleRows.length > 0) {
           const dataSet = new S.System.Data.DataSet('root')
-          dataSet.readJson(JSON.stringify(sampleRows))
+          dataSet.readJson(JSON.stringify({ root: sampleRows }))
           stiReport.regData('root', 'root', dataSet, true)
         } else if (!loaded) {
           if (!queryResult.ok) {

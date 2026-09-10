@@ -193,6 +193,10 @@ const SysReportQuery = forwardRef(function SysReportQuery({ srpId }, ref) {
         message.error('Stimulsoft 未載入，請先執行 npm install')
         return
       }
+      if (!meta) {
+        message.error('報表定義尚未載入完成，請稍後再試')
+        return
+      }
       const S = window.Stimulsoft
       const fileRes = await sysReportApi.getReportFile(srpId)
       const saved = fileRes.data?.srp_reportfile
@@ -208,8 +212,23 @@ const SysReportQuery = forwardRef(function SysReportQuery({ srpId }, ref) {
       const dataRes = await sysReportApi.runQuery(srpId, previewParams.criteria, previewParams.orderby)
       if (cancelled) return
       const dataSet = new S.System.Data.DataSet('root')
-      dataSet.readJson(JSON.stringify(dataRes.data))
+      // 注意：readJson 餵「純陣列」時，Stimulsoft 底層一律把資料表命名為固定的
+      // "root"，不管 DataSet 建構子給的名字是什麼；一定要用 {表名: rows} 包一層，
+      // 否則會跟下面 srpmeta 的資料表撞名，導致欄位綁定時好時壞。
+      dataSet.readJson(JSON.stringify({ root: dataRes.data }))
       report.regData('root', 'root', dataSet)
+
+      // 比照設計器灌入 srpmeta，讓版面上綁定的 SRP_NAME 等欄位預覽/列印時有值
+      const metaDataSet = new S.System.Data.DataSet('srpmeta')
+      metaDataSet.readJson(JSON.stringify({
+        srpmeta: [{
+          srp_id: meta.srp_id,
+          srp_code: meta.srp_code,
+          srp_name: meta.srp_name,
+          srp_description: meta.srp_description,
+        }],
+      }))
+      report.regData('srpmeta', 'srpmeta', metaDataSet)
 
       const viewerOptions = new S.Viewer.StiViewerOptions()
       viewerOptions.appearance.fullScreenMode = true
