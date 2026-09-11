@@ -54,9 +54,35 @@ def row_to_dict(cur, row):
     return dict(zip([d[0].lower() for d in cur.description], row))
 
 
+SORTABLE_COLUMNS = {
+    "cum_no": "CUM_NO",
+    "cum_name": "CUM_NAME",
+    "cum_president": "CUM_PRESIDENT",
+    "cum_contant": "CUM_CONTANT",
+    "cum_tel1": "CUM_TEL1",
+    "cum_uniform_no": "CUM_UNIFORM_NO",
+    "cum_addr": "CUM_ADDR",
+}
+
+
+def _parse_sort(sort: Optional[str]) -> str:
+    """把前端表格欄位排序（如 "cum_name:desc"）轉成 ORDER BY 子句，僅接受白名單欄位。"""
+    if not sort:
+        return "CUM_NO"
+    parts = []
+    for item in sort.split(","):
+        field, _, direction = item.partition(":")
+        col = SORTABLE_COLUMNS.get(field.strip())
+        if not col:
+            continue
+        parts.append(f"{col} {'DESC' if direction.strip() == 'desc' else 'ASC'}")
+    return ", ".join(parts) if parts else "CUM_NO"
+
+
 @router.get("")
 def list_customers(
     q: Optional[str] = Query(None, description="搜尋客戶編號/名稱/統編"),
+    sort: Optional[str] = Query(None),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=10000),
 ):
@@ -75,6 +101,7 @@ def list_customers(
         total = cur.fetchone()[0]
 
         offset = (page - 1) * page_size
+        order_sql = _parse_sort(sort)
         cur.execute(
             f"""SELECT CUM_NO,CUM_NAME,CUM_PRESIDENT,CUM_CONTANT,CUM_CONT_TITLE,
                        CUM_TEL1,CUM_TEL2,CUM_FAX,CUM_UNIFORM_NO,
@@ -82,7 +109,7 @@ def list_customers(
                        CUM_ADVANCE_AMOUNT,CUM_DESC,CUM_CREATOR,
                        CUM_ACNT_AR,CUM_ACNT_ADVANCE,CUM_INV_RATE
                 FROM TBL_CUSTOMER {where}
-               ORDER BY CUM_NO
+               ORDER BY {order_sql}
                OFFSET %(offset)s ROWS FETCH NEXT %(lim)s ROWS ONLY""",
             {**params, "offset": offset, "lim": page_size},
         )

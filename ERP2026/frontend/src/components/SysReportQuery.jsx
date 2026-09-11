@@ -261,6 +261,10 @@ const SysReportQuery = forwardRef(function SysReportQuery({ srpId }, ref) {
     return () => {
       cancelled = true
       if (viewerDivRef.current) viewerDivRef.current.innerHTML = ''
+      // fullScreenMode 會直接把 document.body/html 設成 overflow: hidden 供內部捲動用，
+      // 關閉 Modal 時要還原，否則整個畫面會卡住無法捲動，需重新整理頁面才會恢復。
+      document.documentElement.style.overflow = ''
+      document.body.style.overflow = ''
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [previewModalVisible, previewParams, srpId, stimulsoftReady])

@@ -17,7 +17,7 @@ export default function SupplierMaster() {
   const [data, setData] = useState([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(20)
+  const [pageSize, setPageSize] = useState(50)
   const [tableLoading, setTableLoading] = useState(false)
   const [searchParams, setSearchParams] = useState({})
 
@@ -105,7 +105,7 @@ export default function SupplierMaster() {
       render: (v) => <Tooltip title={v}>{v}</Tooltip>,
     },
     {
-      title: '操作', key: 'action', width: 100, fixed: 'right',
+      title: '操作', key: 'action', width: 170, fixed: 'right',
       render: (_, record) => (
         <Space size={4}>
           <Button type="link" size="small" icon={<EditOutlined />}
@@ -124,55 +124,54 @@ export default function SupplierMaster() {
 
   return (
     <>
-      <Card styles={{ body: { paddingBottom: 0 } }} style={{ marginBottom: 16 }}>
-        <Title level={4} style={{ margin: 0 }}>廠商基本資料設定</Title>
-      </Card>
-
-      <Card style={{ marginBottom: 16 }}>
-        <Form form={form} layout="inline" onFinish={handleSearch}>
-          <Form.Item name="q" label="關鍵字">
-            <Input
-              placeholder="廠商編號 / 廠商名稱 / 統一編號"
-              allowClear
-              style={{ width: 280 }}
-              prefix={<SearchOutlined style={{ color: '#bbb' }} />}
-            />
-          </Form.Item>
-          <Form.Item>
-            <Space>
-              <Button type="primary" htmlType="submit" icon={<SearchOutlined />}>查詢</Button>
-              <Button icon={<ReloadOutlined />} onClick={handleReset}>重設</Button>
+      <Card styles={{ body: { padding: '12px 24px' } }} style={{ marginBottom: 8 }}>
+        <Row justify="space-between" align="middle" gutter={[16, 8]} wrap>
+          <Col flex="none">
+            <Space direction="vertical" size={0}>
+              <Title level={4} style={{ margin: 0 }}>廠商基本資料設定</Title>
+              <Typography.Text type="secondary">共 <strong>{total}</strong> 筆</Typography.Text>
             </Space>
-          </Form.Item>
-        </Form>
-      </Card>
-
-      <Card>
-        <Row justify="space-between" align="middle" style={{ marginBottom: 12 }}>
-          <Col>
-            <Typography.Text type="secondary">
-              共 <strong>{total}</strong> 筆
-            </Typography.Text>
           </Col>
-          <Col>
+          <Col flex="auto">
+            <Form form={form} layout="inline" onFinish={handleSearch}>
+              <Form.Item name="q" label="關鍵字" style={{ marginBottom: 0 }}>
+                <Input
+                  placeholder="廠商編號 / 廠商名稱 / 統一編號"
+                  allowClear
+                  style={{ width: 280 }}
+                  prefix={<SearchOutlined style={{ color: '#bbb' }} />}
+                />
+              </Form.Item>
+              <Form.Item style={{ marginBottom: 0 }}>
+                <Space>
+                  <Button type="primary" htmlType="submit" icon={<SearchOutlined />}>查詢</Button>
+                  <Button icon={<ReloadOutlined />} onClick={handleReset}>重設</Button>
+                </Space>
+              </Form.Item>
+            </Form>
+          </Col>
+          <Col flex="none">
             <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
               新增廠商
             </Button>
           </Col>
         </Row>
+      </Card>
 
+      <Card styles={{ body: { padding: '8px 16px' } }}>
         <Table
           rowKey="sup_no"
           columns={columns}
           dataSource={data}
           loading={tableLoading}
           size="small"
-          scroll={{ x: 1100 }}
+          scroll={{ x: 1170, y: 'calc(100vh - 400px)' }}
           pagination={{
             current: page,
             pageSize,
             total,
             showSizeChanger: true,
+            pageSizeOptions: ['50', '100', '200'],
             showQuickJumper: true,
             showTotal: (t) => `共 ${t} 筆`,
             onChange: (p, ps) => {

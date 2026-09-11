@@ -135,60 +135,58 @@ export default function ShipList() {
 
   return (
     <>
-      <Card styles={{ body: { paddingBottom: 0 } }} style={{ marginBottom: 16 }}>
-        <Title level={4} style={{ margin: 0 }}>出貨單維護</Title>
-      </Card>
-
-      <Card style={{ marginBottom: 16 }}>
-        <Form form={form} layout="inline" onFinish={handleSearch}>
-          <Form.Item name="q" label="關鍵字">
-            <Input
-              placeholder="出貨單號 / 客戶編號 / 客戶名稱 / 發票號碼"
-              allowClear
-              style={{ width: 260 }}
-              prefix={<SearchOutlined style={{ color: '#bbb' }} />}
-            />
-          </Form.Item>
-          <Form.Item name="status" label="狀態">
-            <Select
-              allowClear
-              placeholder="全部"
-              style={{ width: 120 }}
-              options={[{ value: 0, label: '未確認' }, { value: 1, label: '已確認' }]}
-            />
-          </Form.Item>
-          <Form.Item>
-            <Space>
-              <Button type="primary" htmlType="submit" icon={<SearchOutlined />}>查詢</Button>
-              <Button icon={<FilterOutlined />} onClick={() => setAdvOpen(true)}>進階查詢</Button>
-              <Button icon={<ReloadOutlined />} onClick={handleReset}>重設</Button>
-              {advActive && <Tag closable color="blue" onClose={handleReset}>進階查詢套用中</Tag>}
+      <Card styles={{ body: { padding: '12px 24px' } }} style={{ marginBottom: 8 }}>
+        <Row justify="space-between" align="middle" gutter={[16, 8]} wrap>
+          <Col flex="none">
+            <Space direction="vertical" size={0}>
+              <Title level={4} style={{ margin: 0 }}>出貨單維護</Title>
+              <Typography.Text type="secondary">共 <strong>{total}</strong> 筆</Typography.Text>
             </Space>
-          </Form.Item>
-        </Form>
-      </Card>
-
-      <Card>
-        <Row justify="space-between" align="middle" style={{ marginBottom: 12 }}>
-          <Col>
-            <Typography.Text type="secondary">
-              共 <strong>{total}</strong> 筆
-            </Typography.Text>
           </Col>
-          <Col>
+          <Col flex="auto">
+            <Form form={form} layout="inline" onFinish={handleSearch}>
+              <Form.Item name="q" label="關鍵字" style={{ marginBottom: 0 }}>
+                <Input
+                  placeholder="出貨單號 / 客戶編號 / 客戶名稱 / 發票號碼"
+                  allowClear
+                  style={{ width: 260 }}
+                  prefix={<SearchOutlined style={{ color: '#bbb' }} />}
+                />
+              </Form.Item>
+              <Form.Item name="status" label="狀態" style={{ marginBottom: 0 }}>
+                <Select
+                  allowClear
+                  placeholder="全部"
+                  style={{ width: 120 }}
+                  options={[{ value: 0, label: '未確認' }, { value: 1, label: '已確認' }]}
+                />
+              </Form.Item>
+              <Form.Item style={{ marginBottom: 0 }}>
+                <Space>
+                  <Button type="primary" htmlType="submit" icon={<SearchOutlined />}>查詢</Button>
+                  <Button icon={<FilterOutlined />} onClick={() => setAdvOpen(true)}>進階查詢</Button>
+                  <Button icon={<ReloadOutlined />} onClick={handleReset}>重設</Button>
+                  {advActive && <Tag closable color="blue" onClose={handleReset}>進階查詢套用中</Tag>}
+                </Space>
+              </Form.Item>
+            </Form>
+          </Col>
+          <Col flex="none">
             <Button type="primary" icon={<PlusOutlined />} onClick={() => setModalSmtNo('new')}>
               新增出貨單
             </Button>
           </Col>
         </Row>
+      </Card>
 
+      <Card styles={{ body: { padding: '8px 16px' } }}>
         <Table
           rowKey="smt_no"
           columns={columns}
           dataSource={data}
           loading={tableLoading}
           size="small"
-          scroll={{ x: 900 }}
+          scroll={{ x: 900, y: 'calc(100vh - 400px)' }}
           onRow={(record) => ({
             onClick: () => setModalSmtNo(record.smt_no),
             style: { cursor: 'pointer' },

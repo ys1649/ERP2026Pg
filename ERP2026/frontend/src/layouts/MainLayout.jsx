@@ -97,7 +97,7 @@ export default function MainLayout() {
           items={menuItems}
           selectedKeys={current ? [current.path] : []}
           onClick={({ key }) => navigate(key)}
-          style={{ flex: 1, minWidth: 0, background: 'transparent', fontSize: 15 }}
+          style={{ flex: 1, minWidth: 0, background: 'transparent', fontSize: 13 }}
         />
       </Header>
 

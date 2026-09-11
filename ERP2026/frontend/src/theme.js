@@ -11,6 +11,6 @@ export const antdTheme = {
   },
   components: {
     Table: { headerBg: '#eaf1fc', headerColor: '#0f2a5c' },
-    Menu: { horizontalItemSelectedColor: '#8ecbff' },
+    Menu: { horizontalItemSelectedColor: '#8ecbff', fontSize: 13 },
   },
 }
