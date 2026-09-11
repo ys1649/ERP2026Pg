@@ -12,17 +12,29 @@
 跟 backend/routers/mssql_migrate.py（「MSSQL 資料轉入 PostgreSQL」網頁功能）無關，
 那個功能明確排除這兩張表，這支是專門補這兩張表的獨立工具。
 
+PostgreSQL 連線資訊直接讀 backend/database.py，不寫死 dbname——後端指到哪個
+資料庫（例如暫時測試用的 erp2），這支就跟著寫到哪個，不用手動同步。
+
 用法：
     python import_sysreport.py
 """
+import sys
+from pathlib import Path
+
 import psycopg
 import pymssql
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "backend"))
+import database as backend_database  # noqa: E402
 
 MSSQL_CONNINFO = dict(
     server="tnvtrsap01", user="erp", password="erp", database="erp", timeout=10,
     charset="CP950",  # 中文欄位是 Big5 非 Unicode collation，預設編碼會讀成亂碼
 )
-PG_CONNINFO = dict(host="localhost", port=5432, dbname="erp", user="erpuser", password="erpuser")
+PG_CONNINFO = dict(
+    host=backend_database.HOST, port=backend_database.PORT, dbname=backend_database.DBNAME,
+    user=backend_database.USER, password=backend_database.PASSWORD,
+)
 
 REPORT_COLS = ["SRP_ID", "SRP_CODE", "SRP_NAME", "SRP_DESCRIPTION", "SRP_SELECT", "SRP_WHERE", "SRP_GROUPBY", "SRP_ORDERBY"]
 
@@ -35,6 +47,7 @@ FIELD_BIT_COLS = {"SRF_ISMUSTCRITERIA", "SRF_ISWHERE", "SRF_ISSORT", "SRF_SORTDE
 
 
 def main():
+    print(f"目標 PostgreSQL 資料庫：{PG_CONNINFO['dbname']}（跟 backend/database.py 一致）")
     ms_conn = pymssql.connect(**MSSQL_CONNINFO)
     ms_cur = ms_conn.cursor()
 
