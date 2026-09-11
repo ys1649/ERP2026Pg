@@ -157,7 +157,7 @@ export default function SysReportDesignerPage() {
           <Button
             type="text"
             icon={<ArrowLeftOutlined />}
-            onClick={() => navigate('/system/report')}
+            onClick={() => navigate(-1)}
             style={{ marginRight: 8 }}
           />
           設計報表版面 — {report?.srp_name ?? ''} ({report?.srp_code ?? ''})

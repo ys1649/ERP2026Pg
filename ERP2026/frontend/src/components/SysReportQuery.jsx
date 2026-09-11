@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef, forwardRef, useImperativeHand
 import { createPortal } from 'react-dom'
 import {
   Card, Row, Col, Space, Input, InputNumber, DatePicker, Select, Button,
-  List, Modal, message, Spin, Empty, Typography,
+  List, Modal, message, notification, Spin, Empty, Typography,
 } from 'antd'
 import {
   SearchOutlined, CloseCircleOutlined, CloseOutlined, ArrowUpOutlined, ArrowDownOutlined,
@@ -129,7 +129,10 @@ const SysReportQuery = forwardRef(function SysReportQuery({ srpId }, ref) {
         setValues({})
         setOrderby(res.data.orderby_default.map((o) => ({ ...o })))
       })
-      .catch((err) => message.error(err.response?.data?.detail || '載入報表定義失敗'))
+      .catch((err) => {
+        console.log('[SysReportQuery] 載入報表定義失敗', err)
+        notification.error({ message: '錯誤', description: err.response?.data?.detail || '載入報表定義失敗', duration: 4 })
+      })
       .finally(() => setLoadingMeta(false))
   }, [srpId])
 
@@ -190,11 +193,11 @@ const SysReportQuery = forwardRef(function SysReportQuery({ srpId }, ref) {
 
     async function run() {
       if (!stimulsoftReady) {
-        message.error('Stimulsoft 未載入，請先執行 npm install')
+        notification.error({ message: '錯誤', description: 'Stimulsoft 未載入，請先執行 npm install', duration: 4 })
         return
       }
       if (!meta) {
-        message.error('報表定義尚未載入完成，請稍後再試')
+        notification.error({ message: '錯誤', description: '報表定義尚未載入完成，請稍後再試', duration: 4 })
         return
       }
       const S = window.Stimulsoft
@@ -251,8 +254,8 @@ const SysReportQuery = forwardRef(function SysReportQuery({ srpId }, ref) {
 
     run()
       .catch((err) => {
-        console.error('[SysReportQuery] preview error', err)
-        message.error(err.response?.data?.detail || err.message || '預覽失敗')
+        console.log('[SysReportQuery] preview error', err, err.response?.data)
+        notification.error({ message: '錯誤', description: err.response?.data?.detail || err.message || '預覽失敗', duration: 4 })
       })
       .finally(() => {
         if (!cancelled) setPreviewLoading(false)
@@ -344,7 +347,9 @@ const SysReportQuery = forwardRef(function SysReportQuery({ srpId }, ref) {
                 position: 'fixed', top: 6, right: 64, zIndex: 2000000,
                 background: '#fff', boxShadow: '0 0 4px rgba(0,0,0,0.25)',
               }}
-            />,
+            >
+              關閉
+            </Button>,
             document.body
           )}
           {previewLoading && (

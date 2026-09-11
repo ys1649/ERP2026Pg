@@ -42,7 +42,7 @@ class ReportFileUpdate(BaseModel):
 
 class SysReportFieldCreate(BaseModel):
     srf_fieldname: str
-    srf_tablealias: str
+    srf_tablealias: Optional[str] = None
     srf_dispname: str
     srf_disporder: int = 0
     srf_datatype: str = "String"
@@ -64,6 +64,11 @@ class SysReportFieldUpdate(SysReportFieldCreate):
 
 def row_to_dict(cur, row):
     return dict(zip([d[0].lower() for d in cur.description], row))
+
+
+def _qualified_col(f):
+    alias = (f.get("srf_tablealias") or "").strip()
+    return f"{alias}.{f['srf_fieldname']}" if alias else f["srf_fieldname"]
 
 
 def _validate_select_sql(sql: str, label: str = "SRP_SELECT") -> str:
@@ -478,7 +483,7 @@ def get_query_meta(srp_id: int):
         all_fields = [row_to_dict(cur, r) for r in cur.fetchall()]
         meta["fields"] = [f for f in all_fields if f["srf_iswhere"]]
         meta["orderby_default"] = [
-            {"field": f"{f['srf_tablealias']}.{f['srf_fieldname']}", "disp": f["srf_dispname"],
+            {"field": _qualified_col(f), "disp": f["srf_dispname"],
              "dir": "DESC" if f["srf_sortdec"] else "ASC"}
             for f in all_fields if f["srf_issort"]
         ]
@@ -554,7 +559,7 @@ def run_query(
         where_fragments: list = []
         for f in fields:
             c = criteria_map.get(f["srf_seqno"], {})
-            col = f'{f["srf_tablealias"]}.{f["srf_fieldname"]}'
+            col = _qualified_col(f)
             must = bool(f["srf_ismustcriteria"])
             pname = f"p{f['srf_seqno']}"
 
@@ -616,6 +621,7 @@ def run_query(
         try:
             cur.execute(final_sql, binds)
         except Exception as e:
+            logger.error("系統報表查詢 SRP_ID=%s SQL 執行失敗: %s\nSQL: %s", srp_id, e, final_sql)
             raise HTTPException(400, f"報表查詢執行失敗: {e}")
         cols = [d[0] for d in cur.description]
         return [dict(zip(cols, r)) for r in cur.fetchall()]

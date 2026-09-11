@@ -106,8 +106,7 @@ export default function SysReportFieldFormModal({ open, srpId, record, onOk, onC
         <Form.Item
           name="srf_tablealias"
           label="SRF_TABLEALIAS（資料表別名）"
-          rules={[{ required: true, message: '必填' }]}
-          extra="要跟 SRP_SELECT 裡的別名一致，例：SELECT A.* FROM TBL_CUSTOMER A 這裡就填 A"
+          extra="要跟 SRP_SELECT 裡的別名一致，例：SELECT A.* FROM TBL_CUSTOMER A 這裡就填 A；留空則直接用欄位名稱，不加別名前綴"
         >
           <Input maxLength={80} placeholder="例：A" />
         </Form.Item>

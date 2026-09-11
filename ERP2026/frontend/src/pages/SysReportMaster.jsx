@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Card, Table, Button, Space, Input, Form, Row, Col, Popconfirm, message, Tag, Typography } from 'antd'
 import {
   SearchOutlined, PlusOutlined, EditOutlined, DeleteOutlined, ReloadOutlined,
@@ -15,11 +15,13 @@ const { Title, Text } = Typography
 
 export default function SysReportMaster() {
   const navigate = useNavigate()
+  const [urlSearchParams, setUrlSearchParams] = useSearchParams()
+  const initialQ = urlSearchParams.get('q') || ''
   const [form] = Form.useForm()
   const [data, setData] = useState([])
   const [total, setTotal] = useState(0)
   const [tableLoading, setTableLoading] = useState(false)
-  const [searchParams, setSearchParams] = useState({})
+  const [searchParams, setSearchParams] = useState(initialQ ? { q: initialQ } : {})
 
   const [formOpen, setFormOpen] = useState(false)
   const [editRecord, setEditRecord] = useState(null)
@@ -49,14 +51,17 @@ export default function SysReportMaster() {
   useEffect(() => { fetchData() }, [fetchData])
 
   const handleSearch = (values) => {
-    const params = { q: values.q?.trim() || undefined }
+    const q = values.q?.trim() || undefined
+    const params = { q }
     setSearchParams(params)
+    setUrlSearchParams(q ? { q } : {})
     fetchData(params)
   }
 
   const handleReset = () => {
     form.resetFields()
     setSearchParams({})
+    setUrlSearchParams({})
     fetchData({})
   }
 
@@ -146,7 +151,7 @@ export default function SysReportMaster() {
       </Card>
 
       <Card style={{ marginBottom: 16 }}>
-        <Form form={form} layout="inline" onFinish={handleSearch}>
+        <Form form={form} layout="inline" onFinish={handleSearch} initialValues={{ q: initialQ }}>
           <Form.Item name="q" label="關鍵字">
             <Input
               placeholder="報表編號 / 名稱"
