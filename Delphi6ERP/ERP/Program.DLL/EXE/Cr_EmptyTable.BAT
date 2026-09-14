@@ -1,4 +1,4 @@
-isql -S localhost -U erp -P erp -d erp_xt3 -i Create_SysReport_SQL.sql
-isql -S localhost -U erp -P erp -d erp_xt3 -i Create_All_ERP_TABLE.sql
-isql -S localhost -U erp -P erp -d erp_xt3 -i InsertAccount.sql
+sqlcmd -S TNVTRSAP01 -U erp -P erp -d erp -i Create_SysReport_SQL.sql
+sqlcmd -S TNVTRSAP01 -U erp -P erp -d erp -i Create_All_ERP_TABLE.sql
+sqlcmd -S TNVTRSAP01 -U erp -P erp -d erp -i InsertAccount.sql
 pause

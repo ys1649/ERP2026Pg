@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      PostgreSQL 8                                 */
-/* Created on:     2026/9/11 ¤U¤È 03:11:41                        */
+/* Created on:     2026/9/14 ¤U¤È 01:41:30                        */
 /*==============================================================*/
 
 
@@ -1159,7 +1159,7 @@ create table TBL_SYS_PARAM (
    SPR_PRD_COST_RATE    NUMERIC(18,4)        not null default 0.05,
    SPR_BONUS_SALE_RATE  NUMERIC(18,4)        not null default 0.01,
    SPR_BONUS_PROFIT_RATE NUMERIC(18,4)        not null default 0.15,
-   SPR_ACNT_YEAR        INT4                 not null default 2004,
+   SPR_ACNT_YEAR        INT4                 not null default 2025,
    SPR_ACNT_SALE_REVENUE VARCHAR(20)          not null default '4111',
    SPR_ACNT_SALE_RETURN VARCHAR(20)          not null default '4171',
    SPR_ACNT_SALE_DISCOUNT VARCHAR(20)          not null default '4191',
