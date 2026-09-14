@@ -51,10 +51,10 @@ export const menuTree = [
     children: [
       { key: 'trade-order', label: '訂單維護', path: '/trade/order', icon: FileTextOutlined },
       { key: 'trade-shipment', label: '出貨單', path: '/trade/shipment', icon: CarOutlined, ready: true },
-      { key: 'trade-purchase', label: '進貨單', path: '/trade/purchase', icon: ImportOutlined },
-      { key: 'trade-receivable', label: '應收帳款維護', path: '/trade/receivable', icon: DollarOutlined },
-      { key: 'trade-payable', label: '應付帳款維護', path: '/trade/payable', icon: WalletOutlined },
-      { key: 'trade-misc', label: '雜收發單據維護', path: '/trade/misc', icon: SwapOutlined },
+      { key: 'trade-purchase', label: '進貨單', path: '/trade/purchase', icon: ImportOutlined, ready: true },
+      { key: 'trade-receivable', label: '應收帳款維護', path: '/trade/receivable', icon: DollarOutlined, ready: true },
+      { key: 'trade-payable', label: '應付帳款維護', path: '/trade/payable', icon: WalletOutlined, ready: true },
+      { key: 'trade-misc', label: '庫房調整單', path: '/trade/misc', icon: SwapOutlined, ready: true },
     ],
   },
   {
@@ -62,7 +62,7 @@ export const menuTree = [
     label: '會計總帳系統',
     icon: AccountBookOutlined,
     children: [
-      { key: 'gl-voucher', label: '傳票維護', path: '/gl/voucher', icon: FileDoneOutlined },
+      { key: 'gl-voucher', label: '傳票維護', path: '/gl/voucher', icon: FileDoneOutlined, ready: true },
       { key: 'gl-income-statement', label: '損益表', path: '/gl/income-statement', icon: LineChartOutlined },
       { key: 'gl-balance-sheet', label: '資產負債表', path: '/gl/balance-sheet', icon: PieChartOutlined },
       { key: 'gl-cashflow', label: '現金流量表', path: '/gl/cashflow', icon: FundOutlined },

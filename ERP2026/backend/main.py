@@ -15,6 +15,11 @@ from routers import (
     cars,
     acnt_accounts,
     ship,
+    po_recv,
+    ar_recv,
+    ap_pay,
+    inv_adjust,
+    acnt_journal,
     backup,
 )
 
@@ -47,6 +52,11 @@ app.include_router(employees.router, prefix="/api/employees", tags=["employees"]
 app.include_router(cars.router, prefix="/api/cars", tags=["cars"])
 app.include_router(acnt_accounts.router, prefix="/api/acnt-accounts", tags=["acnt-accounts"])
 app.include_router(ship.router, prefix="/api/ship", tags=["ship"])
+app.include_router(po_recv.router, prefix="/api/po-recv", tags=["po-recv"])
+app.include_router(ar_recv.router, prefix="/api/ar-recv", tags=["ar-recv"])
+app.include_router(ap_pay.router, prefix="/api/ap-pay", tags=["ap-pay"])
+app.include_router(inv_adjust.router, prefix="/api/inv-adjust", tags=["inv-adjust"])
+app.include_router(acnt_journal.router, prefix="/api/acnt-journal", tags=["acnt-journal"])
 app.include_router(backup.router, prefix="/api/backup", tags=["backup"])
 
 if __name__ == "__main__":

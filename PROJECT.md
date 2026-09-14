@@ -1,6 +1,8 @@
 # ERP2026 進銷存系統 — 開發文件
 
-> 最後更新：2026-09-10（新增系統備份與還原功能，`/system/backup`，`pg_dump`/`psql` 包裝；詳見〈目錄結構〉〈已完成功能〉章節）
+> 最後更新：2026-09-14（交易單據維護（Category 2）全數完成：進貨單/應收帳款收款/進貨付款/庫房調整單，加上會計總帳的傳票維護；詳見〈目錄結構〉〈已完成功能〉章節）
+>
+> **⚠️ 專案根目錄有 [`CLAUDE.md`](CLAUDE.md)，記錄了這個移植專案最重要的工作原則（完全比照舊系統邏輯，包含已知的怪異行為/bug，不要跨模組自作主張統一或修正）——開始開發任何新功能前一定要先讀。**
 
 ---
 
@@ -97,6 +99,11 @@ ERP2026/
 │       ├── cars.py          # 車輛主檔 CRUD + renumber
 │       ├── acnt_accounts.py # 會計科目主檔 CRUD（無 renumber，比照 Delphi6ERP 沒做這個功能）+ /types 科目類別下拉選單
 │       ├── ship.py          # ★ 出貨單 CRUD + book/unbook(確認/取消確認) + quick-collect(快速收款) + history(歷史查詢) + price(客戶歷史單價查詢)
+│       ├── po_recv.py       # ★ 進貨單 CRUD + book/unbook + quick-pay(快速付款) + history + price（結構完全比照 ship.py，價格查詢無後備值，虛擬商品確認時跳過不記交易）
+│       ├── ar_recv.py       # ★ 應收帳款收款作業：CRUD 只有 create/delete（無 edit/book/unbook，存檔即直接過帳）+ candidates(該客戶未清出貨單清單)
+│       ├── ap_pay.py        # ★ 進貨付款作業：同 ar_recv.py 的「無 edit/book/unbook」結構 + candidates(該廠商未清進貨單) + 動用預付款上限檢查
+│       ├── inv_adjust.py    # ★ 庫房調整單 CRUD + book/unbook（**完全不過帳到 GL**，只呼叫 inventory.py，不 import accounting.py；不跳過虛擬商品，比照舊系統原樣不加防護）
+│       ├── acnt_journal.py  # ★ 傳票維護：CRUD 無 book/unbook（存檔即生效，比照舊系統 ActBook/ActUnBook 從未接上 OnExecute 的事實）；借貸平衡檢查是存檔前的請求層驗證，不是 accounting.py 的 chk_dc_balance
 │       ├── reports.py       # 報表檔案列表 + 下載 API（no-cache）
 │       ├── data_dict.py     # 資料字典主檔/欄位 CRUD + Lookup meta/data API
 │       ├── sysreport.py     # 系統報表主檔/欄位 CRUD + 動態查詢引擎（比照 Delphi6ERP 動態組 WHERE/ORDER BY）+ 版面讀寫
@@ -138,6 +145,11 @@ ERP2026/
 │       │   ├── cars.js          # carApi（含 renumber）
 │       │   ├── acntAccounts.js  # acntAccountApi：CRUD + listTypes（科目類別下拉選單資料來源）
 │       │   ├── ship.js          # ★ shipApi：CRUD + book/unbook/quickCollect/price/history
+│       │   ├── poRecv.js        # ★ poRecvApi：CRUD + book/unbook/quickPay/price/history
+│       │   ├── arRecv.js        # ★ arRecvApi：list/get/create/remove/candidates（無 update，此模組本來就沒有編輯功能）
+│       │   ├── apPay.js         # ★ apPayApi：同 arRecv.js 結構
+│       │   ├── invAdjust.js     # ★ invAdjustApi：CRUD + book/unbook/currentCost
+│       │   ├── acntJournal.js   # ★ acntJournalApi：CRUD（無 book/unbook）
 │       │   ├── reports.js       # reportApi：listCustomer / customerReportUrl（含 cache-buster）
 │       │   ├── datadict.js      # dataDictApi：主檔/欄位 CRUD、meta、data
 │       │   ├── sysreport.js     # sysReportApi：主檔/欄位 CRUD、selectColumns、fieldLookupData、query-meta、runQuery
@@ -158,6 +170,11 @@ ERP2026/
 │       │   ├── CarMaster.jsx        # 車輛主檔維護頁面
 │       │   ├── AcntAccountMaster.jsx # 會計科目維護頁面
 │       │   ├── ShipList.jsx         # ★ 出貨單列表頁（`/trade/shipment`，篩選/狀態，點列開新增/編輯彈窗——本身不是路由頁面）
+│       │   ├── PurchaseList.jsx     # ★ 進貨單列表頁（`/trade/purchase`，結構同 ShipList.jsx）
+│       │   ├── ArRecvList.jsx       # ★ 應收帳款收款作業列表頁（`/trade/receivable`）
+│       │   ├── ApPayList.jsx        # ★ 進貨付款作業列表頁（`/trade/payable`）
+│       │   ├── InvAdjustList.jsx    # ★ 庫房調整單列表頁（`/trade/misc`，menuConfig 選單標籤已從佔位的「雜收發單據維護」改成「庫房調整單」）
+│       │   ├── JournalList.jsx      # ★ 傳票維護列表頁（`/gl/voucher`）
 │       │   ├── DataDictMaster.jsx   # 資料字典維護頁面（主檔 + 欄位定義）
 │       │   ├── SysReportMaster.jsx  # 系統報表定義維護頁面
 │       │   ├── MssqlMigrate.jsx     # ★「MSSQL 資料轉入 PostgreSQL」頁面（系統設定分類下）
@@ -170,6 +187,11 @@ ERP2026/
 │           ├── CarFormModal.jsx           # 新增/編輯車輛 Modal（dayjs 日期欄位）
 │           ├── AcntAccountFormModal.jsx   # 新增/編輯會計科目 Modal（科目類別下拉選單、科目編號格式驗證）
 │           ├── ShipFormModal.jsx          # ★ 出貨單新增/編輯彈窗（可拖曳+可縮放，比照 Delphi6ERP 原畫面：表頭/表尾固定高度、品項表格撐滿剩餘空間並自帶捲軸）
+│           ├── PoRecvFormModal.jsx        # ★ 進貨單新增/編輯彈窗（同 ShipFormModal.jsx 的可拖曳+可縮放版面，去掉出貨單才有的送貨相關欄位與成本欄）
+│           ├── ArRecvFormModal.jsx        # ★ 收款作業彈窗（固定尺寸一般 Modal，非可拖曳——這支複雜度用不到那套機制；只有 create/view 兩種模式，沒有 edit）
+│           ├── ApPayFormModal.jsx         # ★ 付款作業彈窗（同 ArRecvFormModal.jsx 結構）
+│           ├── InvAdjustFormModal.jsx     # ★ 庫房調整單彈窗（固定尺寸 Modal，有 Book/Unbook 但沒有 GL 相關欄位）
+│           ├── JournalFormModal.jsx       # ★ 傳票維護彈窗（固定尺寸 Modal，借/貸分兩欄輸入但底層仍是單一有號金額欄位）
 │           ├── CustomerReport.jsx         # Stimulsoft 報表設計器/預覽 Modal（localStorage 版面）
 │           ├── CustomerReportPreview.jsx  # Stimulsoft 純預覽 Modal（載入 .mrt 檔）
 │           ├── DataDictFormModal.jsx      # 新增/編輯資料字典主檔 Modal
@@ -210,7 +232,7 @@ Password: erpuser
 | 分類 | 資料表 | 資料來源 |
 |--------|------|---------|
 | 主檔資訊（7，已有功能頁面） | `tbl_customer`／`tbl_supplier`／`tbl_product`／`tbl_employe`／`tbl_car`／`tbl_acnt_account`／`tbl_acnt_type` | **Delphi6ERP（MSSQL）真實資料**，見〈搬移 Delphi6ERP 業務資料〉；`tbl_acnt_type`（科目類別）沒有獨立維護頁面，只在會計科目表單當下拉選單資料來源 |
-| 交易/庫存/總帳（18，還沒有功能頁面） | `tbl_ship`／`tbl_ship_dt`／`tbl_po_recv`／`tbl_po_recv_dt`／`tbl_ar_recv`／`tbl_ar_recv_dt`／`tbl_ap_pay`／`tbl_ap_pay_dt`／`tbl_inv_adj`／`tbl_inv_adj_dt`／`tbl_inventory`／`tbl_inv_onhand`／`tbl_transaction`／`tbl_acnt_journal`／`tbl_acnt_journal_dt`／`tbl_acnt_init`／`tbl_sys_param`／`tbl_fld_for_edit` | 同上，**Delphi6ERP（MSSQL）真實資料**（後端目前還沒有對應的功能頁面，屬於〈待開發功能〉） |
+| 交易/庫存/總帳（18，13 張已有功能頁面） | `tbl_ship`／`tbl_ship_dt`／`tbl_po_recv`／`tbl_po_recv_dt`／`tbl_ar_recv`／`tbl_ar_recv_dt`／`tbl_ap_pay`／`tbl_ap_pay_dt`／`tbl_inv_adj`／`tbl_inv_adj_dt`／`tbl_acnt_journal`／`tbl_acnt_journal_dt`（以上 12 張＋庫存引擎共用的 `tbl_transaction`，共 13 張已有功能頁面，見〈已完成功能〉）；`tbl_inventory`／`tbl_inv_onhand`／`tbl_acnt_init`（死表，見 `CLAUDE.md`／研究筆記）／`tbl_sys_param`（僅後端讀取用，尚無管理頁面）／`tbl_fld_for_edit` 還沒有對應功能頁面 | 同上，**Delphi6ERP（MSSQL）真實資料** |
 | 歷史單據（4，還沒有功能頁面） | `tbl_his_ship`／`tbl_his_ship_dt`／`tbl_his_po_recv`／`tbl_his_po_recv_dt` | 同上，**Delphi6ERP（MSSQL）真實資料**；客戶/供應商/產品/員工的「編號變更」後端 API 會更新這幾張表的外鍵，其餘功能尚未開發 |
 | 資料字典（2） | `tbldd`／`tbl_ddfield` | Oracle 測試資料（`migrate_oracle_to_pg.py`），已上線使用中 |
 | 系統報表引擎（2） | `tblsysreport`／`tblsysreportfield` | **Delphi6ERP（MSSQL）真實資料**（52 份報表、144 個查詢欄位），透過 `.claude/skills/import-sysreport` 匯入 |
@@ -807,6 +829,39 @@ npm install
   - [x] 前端還原按鈕需輸入「確認還原」文字才能送出
   - 已知限制：系統尚無登入權限機制，此功能任何人都能觸發，待 auth 模組完成後應重新檢視存取保護
   - **實測**：對一個空白資料庫（`erp2`）執行還原，33 張表／38 個外鍵約束／各表筆數皆與來源 `erp` 完全一致，且未動到 `erp` 本身資料
+- [x] 進貨單（進貨/退出）維護——比照 Delphi6ERP `Form_PoRecv.pas`，結構跟 SHIP 幾乎完全對稱但有幾個關鍵差異，逐一讀碼確認、不是直接假設對稱
+  - [x] 畫面/彈窗模式、確認/取消確認、資料字典多選新增品項、單號產生規則都與 SHIP 相同
+  - [x] **廠商歷史單價查詢無後備值**：`GetSupHisPrice` 查無該廠商該產品的歷史進貨紀錄時回傳 0，不像 SHIP 的 `GetCusHisPrice` 會退回產品標準售價——這是比照舊系統原樣的差異，不是漏做
+  - [x] **確認時虛擬商品（`PRD_IS_DUMMY`）完全跳過**，不記庫存交易也不留任何成本痕跡（`TBL_PO_RECV_DT` 本來就沒有成本欄位）；SHIP 的虛擬商品則仍會寫回 `SMD_COST`，兩者行為不同，各自照舊系統原樣保留
+  - [x] GL 過帳科目對應：借方進貨/進項稅額/進貨退出/進貨折讓，貸方廠商應付帳款（`TBL_SUPPLIER.SUP_ACNT_AP`），跟 SHIP 的借貸方向恰好相反（SHIP 是應收帳款在借方）
+  - 範圍排除（disclosed，比照舊系統本來就沒有的功能）：列印範圍選項（舊系統原碼有死碼讓「僅列印本張」選項失效，但這次連列印本身都跟 SHIP 一樣先不做）；歷史封存表（`TBL_HIS_PO_RECV` 舊系統寫入邏輯本身已被註解掉，等同沒在用）
+  - **實測**：建立可拋棄的測試進貨單（新增→用資料字典多選新增 8 筆品項→存檔自動編號→確認過帳，驗證 `TBL_TRANSACTION` 正確寫入且移動平均成本重算正確、GL 傳票借貸平衡→取消確認→刪除），資料庫確認產品庫存/成本精確還原到測試前基準值
+- [x] 應收帳款收款作業（AR_RECV）——結構跟 SHIP/PO_RECV **不同**：沒有 Edit、沒有 Book/Unbook，Save 當下就在同一交易內直接過帳，要改內容只能整張刪除重建（這是讀 `FORM_AR_RECV.pas` 確認的真實行為，不是簡化）
+  - [x] 選客戶後自動帶出該客戶所有已確認且未結清的出貨單（`SMT_STATUS=1 AND SMT_NOT_CLEAN<>0`），逐筆分配沖帳金額+折讓
+  - [x] **客戶或收款日期一變動就整批重建候選清單**，會清空已輸入的分配金額——比照舊系統 `InsertClientDT` 的真實（雖然容易讓人資料遺失的）行為，原樣保留
+  - [x] 自動分配（FIFO）：依出貨日期由舊到新分配收款金額，**會把所有明細的折讓重設為 0**，這是舊系統 `ActAutoFillinExecute` 的隱藏副作用，一併重現
+  - [x] 存檔平衡檢查刻意**不含折讓**：現金+票據+動用預收-轉入預收，必須恰好等於分配金額加總（折讓是獨立扣除項）
+  - [x] GL 過帳：現金/客票/折讓借方、動用預收借方/轉入預收貸方（同一科目）、應收帳款貸方（客戶各自的 `CUM_ACNT_AR`）
+  - [x] 刪除單據：明細/主檔刪除後，出貨單未清餘額與客戶預收餘額都是「重新用全部剩餘資料算一次」（`UpdateARNotClean`/`UpdateCUM_Advance_Amount`），不是增量加減，所以天生具備自我修復特性
+  - **實測**：真實建立一筆確認出貨單→用 AR_RECV 全額收款（自動分配）→驗證 GL 傳票、出貨單未清餘額歸零→刪除收款單→驗證未清餘額與客戶預收餘額都精確還原
+- [x] 進貨付款作業（AP_PAY）——AR_RECV 的鏡像模組，同樣沒有 Edit/Book/Unbook
+  - [x] 沖銷對象改成該廠商未清進貨單（`TBL_PO_RECV`），科目對應改成現金/廠商支票貸方、應付帳款借方（廠商各自的 `SUP_ACNT_AP`）
+  - [x] **AP_PAY 特有的檢查（AR_RECV 沒有）**：動用預付款金額不可超過廠商目前的 `SUP_ADVANCE_AMOUNT` 餘額，比照 `Client_MastPAY_FROM_ADVANCEValidate`
+  - **實測**：一張付款單同時沖銷兩張不同進貨單（含一筆更早期留下的測試資料），刪除後兩張進貨單的未清餘額都精確還原到各自原本的數字，驗證「一張單沖多張發票」情境下重算邏輯正確
+- [x] 庫房調整單（INV_ADJUST）——**完全不會過帳到總帳**（確認讀碼結果，不是推測），只影響庫存數量與移動平均成本
+  - [x] 有 Book/Unbook 兩段式流程（跟 AR_RECV/AP_PAY 不同，跟 SHIP/PO_RECV 一樣）
+  - [x] `book_inv_adj` 只呼叫 `services/inventory.py`，完全沒有 `import services.accounting`
+  - [x] **確認時不跳過虛擬商品**（跟 PO_RECV/SHIP 不同），逐筆無條件呼叫 `insert_transaction`——這極可能是舊系統的疏漏，但依照專案原則原樣重現
+  - [x] 沒有會計年度鎖定（`SPR_ACNT_YEAR`）檢查，只有跟其他庫存異動模組共用的結帳日（`SPR_PERIOD_START`）檢查——這是這個模組真的沒有這項檢查，不是漏做
+  - [x] 新增品項成本預設值＝該產品目前的移動平均成本（`GetPrdCurrCost`），不論加減都一樣
+  - [x] `menuConfig.js` 的 `trade-misc`（原本佔位標籤「雜收發單據維護」）確認就是這個模組，選單標籤已改成「庫房調整單」
+  - **實測**：新增+1 調整（成本自動帶現行均價）→確認（驗證庫存+1、均價正確重算、**`tbl_acnt_journal` 零新增**）→取消確認→刪除，產品庫存/成本精確還原到基準值
+- [x] 傳票維護（ACNT_JOURNAL）——第一個會計總帳模組，比照 `Form_Journal.pas`
+  - [x] **沒有 Book/Unbook**：舊系統原碼宣告了 `ActBook`/`ActUnBook` 兩個 Action 但從未指定 `OnExecute`，等於死碼；Save 存檔即直接生效，Edit/Delete 永遠可用、沒有任何狀態鎖
+  - [x] 借貸平衡檢查（`Σjnd_amount==0`）+ 逐筆科目存在性/金額非零檢查，是**請求層的前置驗證**，刻意不重用 `accounting.py` 的 `chk_dc_balance`（那是給自動過帳模組用的「寫入後查 DB SUM」版本，舊系統手動傳票畫面本來就沒呼叫它）
+  - [x] **`TBL_ACNT_JOURNAL` 沒有來源單據欄位**：來源單據（`TBL_SHIP` 等）是反過來各自存一個 `JNL_NO` 指過去；傳票維護畫面查詢/修改/刪除完全不分傳票是手動輸入還是自動過帳產生，可以直接改掉或刪掉一張出貨單自動過帳的傳票——這是舊系統本身既有的資料完整性缺口，原樣保留，只在畫面上加一個**不擋任何動作**的提示文字提醒使用者
+  - [x] 借/貸畫面上分兩欄輸入，底層仍是單一有號金額欄位（正=借方、負=貸方），比照舊系統 `ChangeDC` 直接反轉正負號的行為
+  - **實測**：開啟一筆既有的自動過帳傳票確認警示文字正確顯示；新建一筆真正手動的兩筆分錄平衡傳票（存檔、驗證 `jnl_bill_type=0`）；用 curl 驗證不平衡/科目不存在兩種情境都正確回傳 400；刪除後確認兩張表都清空
 
 ---
 
@@ -815,13 +870,21 @@ npm install
 > 以下功能的**資料庫表跟真實資料已經在 `erp` 裡了**（Delphi6ERP／MSSQL 遷移過來的 29 張業務表，見〈資料庫〉章節），
 > 缺的是後端 API 與前端頁面。
 
-- [ ] 交易單據維護其餘部分（訂單 / 進貨單 `tbl_po_recv`／`tbl_po_recv_dt` / 應收帳款收款維護（目前只有出貨單內建的快速收款，沒有獨立的應收帳款頁面）/ 應付 `tbl_ap_pay` / 雜收發單據，見 `menuConfig.js` 的 `trade` 分類；出貨單已完成，見〈已完成功能〉。移動平均成本引擎（`backend/services/inventory.py`）與 GL 過帳輔助（`backend/services/accounting.py`）已經是共用模組，進貨單/雜收發單據記得重用不要重寫）
-- [ ] 管理報表（應付/應收帳款統計表、明細表，見 `report` 分類；`ST_RPT_*`/`MG_*` 等對應報表定義已從 Delphi6ERP 匯入 `tblsysreport`，可以直接用系統報表模組承接，不一定要另外寫頁面）
-- [ ] 會計總帳系統（傳票維護 `tbl_acnt_journal`／`tbl_acnt_journal_dt`、損益表、資產負債表，見 `gl` 分類；會計科目主檔已完成，見〈已完成功能〉）
-- [ ] 成本作業（期間維護，見 `cost` 分類；庫存移動平均成本流水帳 `tbl_transaction` 資料已就緒，重算邏輯要參考 Delphi6ERP `erp_public.pas` 的 `InsertTransaction`/`UpdateTransaction` 重新實作，注意併發寫入下的成本重算正確性；會計年度結轉 `Form_AcntChgYear.pas` 也歸在系統模組範疇，見下一項）
-- [ ] 系統設定其餘項目（功能權限管理、系統資料設定、會計年度結轉，見 `system` 分類；系統備份與還原已完成，見〈已完成功能〉）
-- [ ] 主檔資訊的報表列印（Stimulsoft 設計器/預覽，比照客戶主檔的 `CustomerReport`/`CustomerReportPreview` 模式，供應商/產品/員工/車輛/會計科目目前都還沒有對應 `.mrt` 報表定義與列印按鈕）
-- [ ] 使用者登入 / 權限控管（Delphi6ERP 原本有硬編碼萬用密碼 `WYS`/`WYSEN` 後門，新系統設計登入機制時不要沿用）
+> **交易單據維護（`menuConfig.js` 的 `trade` 分類）已全數完成**：出貨單/進貨單/應收帳款收款/進貨付款/庫房調整單，見〈已完成功能〉。以下是實際還沒做的部分。
+
+- [ ] **會計總帳系統其餘 7 張報表**（`gl` 分類；傳票維護已完成，見〈已完成功能〉）。已對 `Form_Acnt_Asset.pas`/`Form_AcntBalance.pas`/`Form_AcntCash.pas`/`Form_AcntDaily.pas`/`Form_AcntDetail.pas`/`Form_AcntIncomeStament.pas`/`Form_AcntTrialBalance.pas` 做過完整讀碼，開工前務必先確認以下兩個已知疑點（不要直接假設）：
+  - **現金簿**：讀碼結果是一支**獨立客製表單**（科目編碼寫死 `'1111'`，需要「期初餘額+逐筆累計餘額」的滾動小計），跟先前規劃「走系統報表動態引擎」的方向互相衝突，動工前要先跟使用者確認要照哪一種做
+  - **試算表**：舊系統的實際邏輯是「區間淨發生額，依正負分借貸兩欄」，**沒有**期初餘額/期末餘額欄位，跟一般「期初+本期借貸發生額+期末」的四欄式試算表定義不同——這個差異很大，要先確認是要原樣照抄現有邏輯，還是使用者原本期待的就是四欄式（後者等於要另外設計，不是照抄）
+  - 損益表每列 `%` 比率的分母是「該科目所屬大類自己的合計」，不是「營業收入淨額」；資產負債表把當期損益灌入權益需要三段獨立彙總；科目餘額表/日記帳/試算表比較單純，適合走系統報表引擎的動態 SQL；`JNL_BILL_TYPE<>2`（排除年度結轉傳票）這個過濾條件只出現在科目餘額表/現金簿/明細分類帳，其餘 4 張沒有，這個不一致要不要統一也要先確認
+- [ ] **成本作業**（`cost` 分類）：
+  - 庫存交易重整（`ResetInvTransaction`）：舊系統是「整個 `TBL_TRANSACTION` 先 DELETE 再依來源單據重建」且**沒有交易包裹、沒有確認對話框**的高風險工具，全庫無條件重算、不能只挑單一產品或日期區間；值不值得做成網頁功能還是改用後端 script/CLI 處理，要先問過使用者
+  - `menuConfig.js` 目前的 `cost-period`「期間維護」在舊系統模組清單裡找不到對應項目，用途不明，需要跟使用者確認這是新規劃還是筆誤
+- [ ] **系統模組其餘項目**（`system` 分類；系統備份與還原已完成，見〈已完成功能〉）：
+  - 會計年度結轉（`ACNT_CHANGE_YEAR`）：舊系統**完全沒有任何前置檢查**（不檢查借貸平衡、未過帳單據），純靠使用者按一次確認對話框，且損益科目餘額轉入權益時寫死科目代號 `3351`；這是高風險的批次操作，動工前要先確認要不要維持這種「零檢查」的原樣行為
+  - 系統設定（`SYS_PARAM`）：舊系統畫面只給使用者編輯 10 個欄位（公司資訊/稅率/備份路徑等），會計年度、11 個自動過帳科目代號、小數位數設定完全沒有 UI 可以改，只能後台直接操作 DB 或靠專屬模組——是否要原樣保留這個限制，還是趁機補齊管理介面，要先確認
+  - 功能權限管理：使用者已明確表示這次移植範圍不含（舊系統本來就只有登入沒有細部權限）
+- [ ] 主檔資訊的報表列印（Stimulsoft 設計器/預覽，比照客戶主檔的 `CustomerReport`/`CustomerReportPreview` 模式，供應商/產品/員工/車輛/會計科目目前都還沒有對應 `.mrt` 報表定義與列印按鈕）；出貨單/進貨單等交易單據的列印也還沒做（舊系統對應的 ReportBuilder 樣板沒有 Stimulsoft 對應版本）
+- [ ] 使用者登入 / 權限控管（Delphi6ERP 原本有硬編碼萬用密碼 `WYS`/`WYSEN` 後門，也用明碼比對密碼，新系統設計登入機制時都不要沿用；目前全系統的 `CREATOR` 都先寫死常數 `"WYS"`，等登入機制做好要換成真正的登入者）
 - [ ] 52 份系統報表逐一在 Stimulsoft Designer 重新設計版面（`SRP_REPORTFILE` 目前都是 NULL，ReportBuilder 版面無法自動轉換，見〈匯入系統報表定義〉小節）
 - [ ] Docker 部署設定
 

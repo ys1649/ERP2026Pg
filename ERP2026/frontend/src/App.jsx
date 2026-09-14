@@ -9,6 +9,11 @@ import EmployeeMaster from './pages/EmployeeMaster'
 import CarMaster from './pages/CarMaster'
 import AcntAccountMaster from './pages/AcntAccountMaster'
 import ShipList from './pages/ShipList'
+import PurchaseList from './pages/PurchaseList'
+import JournalList from './pages/JournalList'
+import ArRecvList from './pages/ArRecvList'
+import ApPayList from './pages/ApPayList'
+import InvAdjustList from './pages/InvAdjustList'
 import DataDictMaster from './pages/DataDictMaster'
 import SysReportMaster from './pages/SysReportMaster'
 import SysReportDesignerPage from './pages/SysReportDesignerPage'
@@ -25,6 +30,11 @@ const readyComponents = {
   '/basic/car': CarMaster,
   '/basic/acnt-account': AcntAccountMaster,
   '/trade/shipment': ShipList,
+  '/trade/purchase': PurchaseList,
+  '/gl/voucher': JournalList,
+  '/trade/receivable': ArRecvList,
+  '/trade/payable': ApPayList,
+  '/trade/misc': InvAdjustList,
   '/system/datadict': DataDictMaster,
   '/system/report': SysReportMaster,
   '/system/mssql-migrate': MssqlMigrate,
