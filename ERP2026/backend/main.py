@@ -20,14 +20,25 @@ from routers import (
     ap_pay,
     inv_adjust,
     acnt_journal,
+    gl_reports,
     backup,
 )
+
+class NonLockingFileHandler(logging.FileHandler):
+    """每次寫完一行就關閉檔案控制代碼，不像預設 FileHandler 整個程式生命週期都握著檔案不放——
+    Windows 上這樣會擋掉外部編輯器（記事本/EditPlus等）存檔（存檔時通常要先刪除/取代原檔，
+    只要有其他程序開著就會存檔失敗）。寫入頻率不高（API log），每次多一次 open/close 沒差。"""
+
+    def emit(self, record):
+        super().emit(record)
+        self.close()
+
 
 LOG_FILE = Path(__file__).resolve().parent / "uvicorn_8000.log"
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(name)s: %(message)s",
-    handlers=[logging.StreamHandler(), logging.FileHandler(LOG_FILE, encoding="utf-8")],
+    handlers=[logging.StreamHandler(), NonLockingFileHandler(LOG_FILE, encoding="utf-8")],
     force=True,
 )
 
@@ -56,6 +67,7 @@ app.include_router(po_recv.router, prefix="/api/po-recv", tags=["po-recv"])
 app.include_router(ar_recv.router, prefix="/api/ar-recv", tags=["ar-recv"])
 app.include_router(ap_pay.router, prefix="/api/ap-pay", tags=["ap-pay"])
 app.include_router(inv_adjust.router, prefix="/api/inv-adjust", tags=["inv-adjust"])
+app.include_router(gl_reports.router, prefix="/api/gl-reports", tags=["gl-reports"])
 app.include_router(acnt_journal.router, prefix="/api/acnt-journal", tags=["acnt-journal"])
 app.include_router(backup.router, prefix="/api/backup", tags=["backup"])
 

@@ -1,6 +1,6 @@
 # ERP2026 進銷存系統 — 開發文件
 
-> 最後更新：2026-09-14（交易單據維護（Category 2）全數完成：進貨單/應收帳款收款/進貨付款/庫房調整單，加上會計總帳的傳票維護；詳見〈目錄結構〉〈已完成功能〉章節）
+> 最後更新：2026-09-15（會計總帳 7 張報表全數完成，統一改走「專屬 SQL + 借用 Stimulsoft Designer」模式：科目餘額表/日記帳/試算表/現金簿/明細分類帳/損益表/資產負債表；詳見〈已完成功能〉章節）
 >
 > **⚠️ 專案根目錄有 [`CLAUDE.md`](CLAUDE.md)，記錄了這個移植專案最重要的工作原則（完全比照舊系統邏輯，包含已知的怪異行為/bug，不要跨模組自作主張統一或修正）——開始開發任何新功能前一定要先讀。**
 
@@ -85,7 +85,8 @@ ERP2026/
 │   │   ├── migrate_oracle_to_pg.py  # Oracle → PostgreSQL 一次性資料 clone（只剩 TBLDD/TBL_DDFIELD 兩張表，其餘已改用 MSSQL 來源）
 │   │   ├── migrate_mssql_to_pg.py   # ★ Delphi6ERP（MSSQL）→ PostgreSQL 一次性搬 29 張業務表（含 DDL 產生 + 中文欄位註解）
 │   │   ├── pdm_comments.json        # 從 PowerDesigner ERP.pdm 解析出的中文欄位名，migrate_mssql_to_pg.py 用來產生 COMMENT ON
-│   │   └── ddl_from_mssql.sql       # migrate_mssql_to_pg.py 執行時自動產生的 DDL 存檔（供參考/除錯，非手動維護）
+│   │   ├── ddl_from_mssql.sql       # migrate_mssql_to_pg.py 執行時自動產生的 DDL 存檔（供參考/除錯，非手動維護）
+│   │   └── create_gl_reports.py     # ★ 建立會計總帳 7 張報表（科目餘額表/日記帳/試算表/現金簿/明細分類帳/損益表/資產負債表）的系統報表定義（TBLSYSREPORT/TBLSYSREPORTFIELD），可重複執行，詳見〈已完成功能〉
 │   ├── services/            # ★ 跨模組共用的業務邏輯（不是某個 router 專屬），未來 PO_RECV/INV_ADJ 等要重用
 │   │   ├── numbering.py     # next_code：比照 DBUty.pas 的 GetNumbericCode（yyyymmdd+補零序號）
 │   │   ├── inventory.py     # 移動平均成本引擎：insert_transaction/update_transaction/delete_transactions_and_recalc，比照 erp_public.pas 的 InsertTransaction/UpdateTransaction
@@ -862,6 +863,40 @@ npm install
   - [x] **`TBL_ACNT_JOURNAL` 沒有來源單據欄位**：來源單據（`TBL_SHIP` 等）是反過來各自存一個 `JNL_NO` 指過去；傳票維護畫面查詢/修改/刪除完全不分傳票是手動輸入還是自動過帳產生，可以直接改掉或刪掉一張出貨單自動過帳的傳票——這是舊系統本身既有的資料完整性缺口，原樣保留，只在畫面上加一個**不擋任何動作**的提示文字提醒使用者
   - [x] 借/貸畫面上分兩欄輸入，底層仍是單一有號金額欄位（正=借方、負=貸方），比照舊系統 `ChangeDC` 直接反轉正負號的行為
   - **實測**：開啟一筆既有的自動過帳傳票確認警示文字正確顯示；新建一筆真正手動的兩筆分錄平衡傳票（存檔、驗證 `jnl_bill_type=0`）；用 curl 驗證不平衡/科目不存在兩種情境都正確回傳 400；刪除後確認兩張表都清空
+- [x] **會計總帳 7 張報表全數完成**（科目餘額表/日記帳/試算表/現金簿/明細分類帳/損益表/資產負債表）——**最終定案的做法**：使用者明確指示全部改走「專屬 SQL + 借用系統報表的 Stimulsoft Report Designer 機制，不用系統報表的動態查詢欄位/查詢畫面」（下方 3 個子項是最早期的過渡方案，已被取代，保留原文供歷史脈絡參考）。7 張報表統一走同一套模式：
+  - **後端**：`backend/routers/gl_reports.py` 每張報表各一個 `GET /api/gl-reports/{report}` + `GET /api/gl-reports/{report}-defaults`，SQL **逐字比照對應 `.pas`/`.dfm` 的原始寫法**（只把 MSSQL 語法換成 PostgreSQL），每次查詢把代入實際數字後的完整 SQL 用獨立一則 log 寫進 `uvicorn_8000.log`（SQL 前面用 `--` 註解說明這則 SQL 的任務+查詢參數，SQL 本身不改格式、不裁切，log 前後不夾雜其他訊息——這是使用者明確要求的 log 格式）
+  - **前端**：`frontend/src/pages/{Report}.jsx` 各一個完全比照舊畫面截圖的獨立小視窗（不透過 `SysReportQuery.jsx` 通用查詢欄位 UI），版面（`SRP_REPORTFILE`）借用同一顆 SRP_ID 的系統報表定義
+  - **版面**：`backend/scripts/build_gl_{report}_layout.py` 手動從對應 `.dfm`（設計期文字檔）逐一抄出 band/欄位座標，轉成 `.claude/skills/convert-sysreport-layout` skill 認得的 `{class,name,props,children}` 樹，呼叫 `rb_to_stimulsoft.convert_report()` 產生 Stimulsoft JSON，可重複執行
+  - **對照表**：科目餘額表(`GL_BALANCE`/63)／日記帳(`GL_DAILY`/64)／試算表(`GL_TRIAL`/65)／現金簿(`GL_CASH`/66)／明細分類帳(`GL_DETAIL`/67)／損益表(`GL_INCOME`/68)／資產負債表(`GL_ASSET`/69)，`menuConfig.js` 各自指到專屬路徑（`/gl/balance`、`/gl/daily`、`/gl/trial`、`/gl/cash`、`/gl/detail`、`/gl/income-statement`、`/gl/balance-sheet`），不再是 `/report/view/{id}`
+  - [x] **共用技術突破/教訓**（適用所有 7 張報表，之後同類報表都要注意）：
+    1. **`srpmeta` 綁定的正確寫法是 `pipeline="plTemplate"`，不是 `"srpmeta"`**——`rb_to_stimulsoft.py` 的 `TppDBText` 轉換邏輯是 `src = "srpmeta" if pipeline == "plTemplate" else "root"`，傳別的字串（包括看起來很直覺的 `"srpmeta"`）都會被當成 `"root"`，欄位會靜默失敗（Stimulsoft 找不到該欄位，印出空白），不會噴錯。這個 bug 在 GL_ASSET/GL_INCOME/GL_BALANCE 三份最早寫的版面都中招過，事後才發現並統一修正
+    2. **Stimulsoft 的 `DataSet.readJson()` 不管 Dictionary 宣告的欄位型別，只要值長得像日期字串（連 `-`、`/` 分隔都算）就自動轉型成內部 `DateTime`**，還牽扯到時區換算：裸的 `{srpmeta.dt_end}` 因此會印出「日期+時間」的落落長格式，且日期還可能因時區換算跟原始輸入差一天；就算明確呼叫 `.ToString("yyyy/MM/dd")` 這個已知會在 `root` 欄位正常運作的手法，對 `srpmeta`（跨資料源參照）卻仍然印出錯誤結果，原因不明、沒有繼續深究。**最終解法**：前端組 `srpmeta` 物件時，把單一日期欄位用 `dayjs(...).format('YYYY年MM月DD日')`（中文日期格式）取代 ISO 格式字串再送進去——這種格式不會命中 Stimulsoft 內建的日期格式清單，能穩定維持字串型別、不被誤轉型（`AssetLiabilityStatement.jsx`/`AccountBalanceStatement.jsx` 都這樣做；損益表/日記帳/試算表/現金簿/明細分類帳的 `dt_range` 因為是「日期 ~ 日期」複合字串，本來就不會命中日期格式清單，不受影響，維持 ISO 格式即可）
+    3. **群組（`StiGroupHeaderBand`）預設 `SortDirection=Ascending`，會依群組條件欄位的文字值重新排序，不是照 SQL 傳回的列順序**——資產負債表原本 `ORDER BY TYP_NO,ACT_NO` 讓「資產」排第一，但畫面卻先顯示「負債及業主權益」（因為「負」的 Unicode 碼比「資」小），事後在瀏覽器對 Designer 即時測試屬性、確認 JSON 屬性是 `"SortDirection": "None"` 才能關閉這個自動排序、改成信任資料來源順序。**所有新建的分組報表現在都從一開始就明確設定 `SortDirection: "None"`**，不用重蹈覆轍
+    4. **ReportBuilder 的「逐列累加」running total 欄位（`TppDBCalc` 放在 Detail band、`ResetGroup` 換分組就歸零重算）在 Stimulsoft 沒有對等機制**——`{Sum(root.field)}` 只會算「到目前為止已經渲染的所有列」還是「整份報表/整個分組」總和，不是我們要的「逐列累加、換組重算」效果。現金簿/明細分類帳的「餘額」欄位改成在**後端 SQL** 用 `SUM(...) OVER (PARTITION BY ACT_NO ORDER BY ... ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)` window function 算好、當成一般查詢欄位回傳，版面端只是單純的 `TppDBText` 綁定，不是 `TppDBCalc`——這是平台差異的等效實作，不是改變數字或邏輯
+    5. **已知未解的限制**：日記帳（`Form_AcntDaily.pas`）的 `ppGroup1`（`BreakName=JNL_DATE`, `NewPage=True`）在舊系統是「換日期強制換頁」，對應的 Stimulsoft 屬性 `StiGroupHeaderBand.StartNewPage`（同樣用瀏覽器對 Designer 即時測試屬性確認 JSON 屬性名稱）已經設定，但實際渲染測試（2025/1/1 一筆 + 2026/9/15 三筆，理論上該分兩頁）結果仍然是「Page 1 of 1」、沒有真的換頁，原因未查出（懷疑是 Stimulsoft 對零高度/極小高度 GroupHeaderBand 的分頁判斷跟 ReportBuilder 不同）。財務數字完全正確，只有這個純排版的換頁效果沒有還原，比照使用者對「平台限制不算商業邏輯」的既有指示判斷為可接受的落差，沒有繼續深究——**如果之後有人要修，從這裡接手繼續查**
+  - [x] **關鍵技術突破**：系統報表引擎的動態 WHERE 是直接字串接在 `SRP_SELECT` 後面（`{SELECT} {動態WHERE} {GROUPBY} {ORDERBY}`），原本以為現金簿/明細分類帳/損益表/資產負債表這種需要「期初餘額」「多類別合併」的報表一定要用 `UNION`（跟這套動態 WHERE 機制不相容），後來確認其實都能改寫成**單一 GROUP BY 查詢**（用 `CASE` 表示式取代 UNION 分支）避開這個限制，完全不用改動共用的 `sysreport.py` 引擎本身
+  - [x] 科目餘額表/日記帳/試算表：單一 `GROUP BY`（或無彙總）查詢，動態日期 WHERE 直接套用；試算表**照抄舊系統邏輯**（區間淨發生額依正負分借貸兩欄，不是期初+本期+期末四欄式，使用者已確認）
+  - [x] 損益表：5 大類（營業收入/成本/費用/營業外收支/所得稅）用 `CASE T.TYP_MAJOR_TYPE...` 分類欄位＋`GROUP BY`，一次查詢產生所有類別的逐科目金額；逐層累計小計（毛利/營業利益/稅前純益/本期損益）與%比率留給 Stimulsoft 版面的群組頁尾算——**比照舊系統本身也是靠 ReportBuilder band 事件算，不是 SQL**，所以資料來源可以是單純的平面查詢
+  - [x] 資產負債表：資產/負債/業主權益科目各自列出，非資產負債權益的科目（收入/成本/費用/營業外/所得稅）用 `CASE` 合併成一筆合成的「本期損益」列（`3353`）灌入業主權益——同樣是單一 `GROUP BY` 查詢，不需要 UNION；查詢日期簡化成使用者直接輸入起訖（舊系統起日是依目前會計年度自動推算，數字算法不變，只是不自動預帶）
+  - [x] 現金簿（科目寫死 `1111`，比照舊系統獨立客製表單的邏輯）／明細分類帳：用視窗函數（`SUM() OVER (ORDER BY ... ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)`）在**未過濾的全部歷史資料**上先算好累計餘額，再包一層子查詢讓動態 WHERE 只影響外層顯示範圍——這樣第一筆顯示列的累計餘額就已經正確反映期初（含以前所有交易）的效果，不需要额外合成一筆「期初餘額」資料列；額外算了一個 `BALANCE_BEFORE`（該筆交易前的餘額）欄位，供之後設計 Stimulsoft 版面時要顯示「期初餘額」文字列使用。明細分類帳的科目篩選簡化成單一區間欄位（舊系統原本有區間/單選/多選三種模式）
+  - **實測**：`create_gl_reports.py` 對既有測試資料（6 筆真實傳票）建立全部 7 筆定義後，用 curl 逐一呼叫 `/api/sysreport/{id}/query` 確認每張都能正確執行且數字合理，其中資產負債表第一版有 bug（`GROUP BY` 多包了一個沒收斂的欄位，導致「本期損益」列沒有正確合併成一筆）已修正並重新驗證資產=負債+權益確實平衡（2300=2300）；在瀏覽器「系統報表管理」頁面確認全部 7 筆正確列出，並實際跑過資產負債表的「測試」查詢流程無錯誤
+  - 待辦（比照現有 52 份已匯入報表的既有慣例，不算這次的缺口）：`SRP_REPORTFILE` 版面目前都是 NULL，要逐一在 Stimulsoft Designer 設計版面才能真正看到報表輸出（分組/頁尾/百分比/期初餘額文字列等呈現細節都要在這一步做）
+  - [x] **選單掛載的踩坑**：一開始這 7 張報表雖然在「系統報表管理」admin 頁面看得到，但完全沒出現在任何導覽選單裡——原因是 `hooks/useReportModules.js` 會依 `SRP_CODE` 前綴（`FM_`/`MG_`/`ST_`）自動把系統報表分類掛到首頁/選單的「表單報表模組/管理報表模組/統計報表模組」，我用的 `GL_` 前綴不在這個清單裡，所以完全不會出現在任何地方。修正方式：**不是**擴充前綴清單，而是直接把這 7 張報表比照「損益表/資產負債表」的原始規劃，加進 `menuConfig.js` 的 `gl`（會計總帳系統）分類，`path` 直接指到既有的通用檢視路由 `/report/view/{srp_id}`（跟動態模組共用同一支 `SysReportViewPage.jsx`，不用另外寫頁面）；同時把 `App.jsx` 產生路由的迴圈改成排除 `/report/view/` 開頭的路徑，避免跟原本就存在的 `<Route path="/report/view/:srpId">` 動態路由衝突。**之後若新增系統報表要掛在既有的功能選單分類（而非表單/管理/統計那三個自動分類），都要照這個模式手動加 `menuConfig.js` 項目，不會自動出現**
+  - [x] 同時把既有的「會計科目一覽表」（原 `FM_ACNT_001`）依使用者指示從「表單報表模組」移到「會計總帳系統」——因為分類完全是前綴決定，做法是直接把 `SRP_CODE` 改成 `GL_ACNT_LIST`（脫離 `FM_` 前綴，`SRP_ID=1` 不變），再加一筆 `menuConfig.js` 項目指到 `/report/view/1`
+  - [x] `create_gl_reports.py` 順手改成真正冪等（找到既有 `SRP_CODE` 就地 `UPDATE`、保留原本的 `SRP_ID`，而非先前那版的刪除重建），因為 `menuConfig.js` 現在會寫死 `srp_id` 在路徑裡，這個 ID 必須穩定不能每次重跑腳本就變
+  - [x] **逐字核對舊碼後修正的落差**：使用者拿實際 Delphi 畫面截圖＋原始碼要求逐句核對後，發現 `GL_ASSET`／`GL_INCOME` 第一版有幾個沒注意到的缺口，已修正——① 資產負債表 `GRP` 改成跟原畫面一樣只分「資產」/「負債及業主權益」兩塊（不是各自獨立三塊）；② 科目用 `SUBSTRING(ACT_NO,1,4)` 併到母科目層級；③ 補上 `HAVING SUM(...)<>0` 濾掉零餘額科目；④ 兩張報表都補上 `RATE` 欄位（用巢狀視窗函數 `SUM(CASE...) OVER (PARTITION BY ...)` 在同一條查詢內算出，不必像舊系統那樣先跑 3 次子查詢拿常數字串接);⑤ 補上 `TYP_NO`/`TYP_NAME` 兩層分組欄位（對應舊畫面的 `ppGroup1`+`ppGroup2` 兩層分組帶）。過程中踩到一次「GROUP BY 表達式沒有逐字比對」的 Postgres 報錯（`CASE` 判斷式裡直接寫 `T.TYP_MAJOR_TYPE='資產'`，跟 GROUP BY 裡包了一層 CASE 的版本不是同一個運算式，Postgres 不認得是同一組），修法是把 SELECT 清單裡所有用到分類判斷的地方都**逐字重複** GROUP BY 那個 CASE 運算式本身，而不是重新寫一個邏輯等價但文字不同的判斷式——**這是這套「單一 GROUP BY 查詢取代 UNION」技巧的一個通用陷阱，以後同類報表要注意**。修正後重新驗證：資產=負債+權益仍平衡（2300=2300），RATE 加總=100%
+  - 仍未定案（已提出、等待使用者答覆）：本期損益(3353)合成列到底要不要比照舊系統真的去 `INNER JOIN` 科目主檔（原邏輯：科目主檔沒有 3353 這筆資料就整列消失），還是維持目前 Web 版直接用 `CASE` 寫死、不依賴主檔存在與否（更穩固但行為不同）
+  - [x] **資產負債表改走「專屬 SQL + 借用 Stimulsoft Designer，不用系統報表的查詢欄位/查詢畫面」的新模式**（使用者明確指示，之後其他財務報表也會比照）：
+    - `backend/routers/gl_reports.py`（`GET /api/gl-reports/asset?dt_end=`）：SQL **逐字比照 `Form_Acnt_Asset.pas` 原始寫法**（3 段先各自查出 `sum_asset`/`sum_liability`/`sum_equity` 純數字常數，再用 f-string 直接接進最終 UNION 查詢——刻意保留舊系統「先算常數再組字串」的寫法，不是重寫成我先前那版的單一 GROUP BY+視窗函數），只把 MSSQL 語法換成 PostgreSQL（`CONVERT(DATETIME,...)`→參數化日期、`ISNULL`→`COALESCE`，`SUBSTRING`/`UNION`/欄位/別名完全不變）；**傳票起始日期固定＝`TBL_SYS_PARAM.SPR_ACNT_YEAR`/1/1**（比照使用者指示的簡化版公式，不是舊系統「跟查詢年度比大小」的完整條件式）；每次查詢都把代入實際數字後的完整 SQL 寫進 `uvicorn_8000.log`（比照舊系統原本就有的 `debug(sql,'A')` 除錯輸出習慣），回應也一併帶 `sql` 欄位方便前端除錯
+    - `frontend/src/pages/AssetLiabilityStatement.jsx`：完全比照舊畫面截圖做的獨立小視窗（標題+圖示+「傳票截止日期」單一欄位+預覽/離開），**不透過 `SysReportQuery.jsx` 的通用查詢欄位 UI**；按預覽時自己組 Stimulsoft `DataSet`/`regData`（邏輯抄自 `SysReportQuery.jsx` 但資料來源換成 `glReportsApi.asset()`），但**版面（`SRP_REPORTFILE`）仍然借用 `GL_ASSET`（`SRP_ID=69`）這筆既有系統報表定義**——這筆定義的 `SRP_SELECT` 本身還是我先前那版的單一 GROUP BY+視窗函數 SQL，但輸出欄位（`grp/typ_major_type/typ_no/typ_name/act_no/act_name/amount/rate`）跟新版 `gl_reports.py` 完全一致，所以在 Stimulsoft Designer 設計版面時抓到的欄位可以直接對應真正上線時會灌進來的資料，不用另外維護一份「設計用」SQL
+    - `menuConfig.js` 的 `gl-balance-sheet` 改回專屬路徑 `/gl/balance-sheet`（不再指到通用的 `/report/view/69`）
+    - **實測**：`dt_end=2025-12-31` 算出 `dt_from=2025-01-01`（`SPR_ACNT_YEAR=2025`），資產 2300=負債+權益 2300 平衡，且 log 檔裡有完整可執行的最終 SQL 文字
+  - [x] **GL_ASSET 的 Stimulsoft 版面沒有從空白畫布重畫，是手動從 `Form_Acnt_Asset.dfm`（設計期文字檔，不是 `SysReport.DLL` 動態報表那種存在 MSSQL 的二進位 blob）逐一抄出精確的 band/欄位座標，重建成 `.claude/skills/convert-sysreport-layout` 那支 skill 認得的 `{class,name,props,children}` 樹，直接呼叫它現成、已驗證過的 `rb_to_stimulsoft.convert_report()` 產生 Stimulsoft JSON**（`backend/scripts/build_gl_asset_layout.py`）：
+    - 這跟該 skill原本的用途（從 MSSQL 讀二進位 blob 反解析）不同──GL_ASSET 是這次新建的報表，MSSQL 裡根本沒有這筆 blob 可解；但因為 `Form_Acnt_Asset.pas` 是獨立 Delphi 表單（不是動態報表），版面資訊本來就在它自己的 `.dfm`（純文字格式）裡，用眼睛讀、手動轉譯出座標即可，不需要寫一支通用的文字 DFM parser
+    - 兩層分組（`ppGroup1`=GRP「資產／負債及業主權益」、`ppGroup2`=TYP_MAJOR_TYPE 子分類）、每層的小計（`DBCalc` Sum + `ResetGroup`）、頁首頁尾的頁碼/頁數系統變數，全部照 `.dfm` 原始座標與綁定欄位重建
+    - `rb_to_stimulsoft.py` 本身**不支援 `DisplayFormat`**（金額千分位、百分比符號會被忽略，转出來的欄位是裸數字）——比照它自己對日期欄位「掛 `.ToString(...)` + `Type:Expression`」的既有做法，另外寫了 `apply_number_formats()` 對產生好的 JSON 做**後製 patch**（不改共用的 `rb_to_stimulsoft.py`，那支要顧到其餘 52+ 份報表），把 5 個金額/百分比欄位換成 `.ToString("N0")`／`.ToString("N3") + " %"` 這類 C# 格式表達式
+    - 轉譯過程抓到一個自己的錯字（`ppLabel8` 原文是「製表日期：」不是「傳票日期：」），已修正；`ppSystemVariable1`（緊接在這個標籤後面）在 `.dfm` 裡沒有寫明 `VarType`，`rb_to_stimulsoft.py` 對「沒寫明」的預設猜測是 `vtPageNo`（頁碼），但配上「製表日期」這個標籤語意上更像是要顯示今天日期——**這點沒有百分之百把握**，先維持顯示頁碼，日後有機會在 Designer 打開實際比對再確認要不要改
+    - **實測**：瀏覽器實際預覽出完整分組報表——「負債及業主權益」（負債小計 2,200 100%、業主權益/本期損益小計 100 100%、合計 2,300）+「資產」（庫存現金 1,200 52.174%、應收帳款 1,100 47.826%、合計 2,300），數字格式正確、借貸平衡
 
 ---
 
@@ -872,10 +907,6 @@ npm install
 
 > **交易單據維護（`menuConfig.js` 的 `trade` 分類）已全數完成**：出貨單/進貨單/應收帳款收款/進貨付款/庫房調整單，見〈已完成功能〉。以下是實際還沒做的部分。
 
-- [ ] **會計總帳系統其餘 7 張報表**（`gl` 分類；傳票維護已完成，見〈已完成功能〉）。已對 `Form_Acnt_Asset.pas`/`Form_AcntBalance.pas`/`Form_AcntCash.pas`/`Form_AcntDaily.pas`/`Form_AcntDetail.pas`/`Form_AcntIncomeStament.pas`/`Form_AcntTrialBalance.pas` 做過完整讀碼，開工前務必先確認以下兩個已知疑點（不要直接假設）：
-  - **現金簿**：讀碼結果是一支**獨立客製表單**（科目編碼寫死 `'1111'`，需要「期初餘額+逐筆累計餘額」的滾動小計），跟先前規劃「走系統報表動態引擎」的方向互相衝突，動工前要先跟使用者確認要照哪一種做
-  - **試算表**：舊系統的實際邏輯是「區間淨發生額，依正負分借貸兩欄」，**沒有**期初餘額/期末餘額欄位，跟一般「期初+本期借貸發生額+期末」的四欄式試算表定義不同——這個差異很大，要先確認是要原樣照抄現有邏輯，還是使用者原本期待的就是四欄式（後者等於要另外設計，不是照抄）
-  - 損益表每列 `%` 比率的分母是「該科目所屬大類自己的合計」，不是「營業收入淨額」；資產負債表把當期損益灌入權益需要三段獨立彙總；科目餘額表/日記帳/試算表比較單純，適合走系統報表引擎的動態 SQL；`JNL_BILL_TYPE<>2`（排除年度結轉傳票）這個過濾條件只出現在科目餘額表/現金簿/明細分類帳，其餘 4 張沒有，這個不一致要不要統一也要先確認
 - [ ] **成本作業**（`cost` 分類）：
   - 庫存交易重整（`ResetInvTransaction`）：舊系統是「整個 `TBL_TRANSACTION` 先 DELETE 再依來源單據重建」且**沒有交易包裹、沒有確認對話框**的高風險工具，全庫無條件重算、不能只挑單一產品或日期區間；值不值得做成網頁功能還是改用後端 script/CLI 處理，要先問過使用者
   - `menuConfig.js` 目前的 `cost-period`「期間維護」在舊系統模組清單裡找不到對應項目，用途不明，需要跟使用者確認這是新規劃還是筆誤
@@ -885,7 +916,7 @@ npm install
   - 功能權限管理：使用者已明確表示這次移植範圍不含（舊系統本來就只有登入沒有細部權限）
 - [ ] 主檔資訊的報表列印（Stimulsoft 設計器/預覽，比照客戶主檔的 `CustomerReport`/`CustomerReportPreview` 模式，供應商/產品/員工/車輛/會計科目目前都還沒有對應 `.mrt` 報表定義與列印按鈕）；出貨單/進貨單等交易單據的列印也還沒做（舊系統對應的 ReportBuilder 樣板沒有 Stimulsoft 對應版本）
 - [ ] 使用者登入 / 權限控管（Delphi6ERP 原本有硬編碼萬用密碼 `WYS`/`WYSEN` 後門，也用明碼比對密碼，新系統設計登入機制時都不要沿用；目前全系統的 `CREATOR` 都先寫死常數 `"WYS"`，等登入機制做好要換成真正的登入者）
-- [ ] 52 份系統報表逐一在 Stimulsoft Designer 重新設計版面（`SRP_REPORTFILE` 目前都是 NULL，ReportBuilder 版面無法自動轉換，見〈匯入系統報表定義〉小節）
+- [ ] 系統報表逐一在 Stimulsoft Designer 設計版面（52 份從 Delphi6ERP 匯入的報表，`SRP_REPORTFILE` 目前都是 NULL，是 ReportBuilder 版面無法自動轉換，見〈匯入系統報表定義〉小節；會計總帳 7 張報表的版面已用 `build_gl_*_layout.py` 腳本各自建好，不在此列）
 - [ ] Docker 部署設定
 
 > 上述功能項目的路徑、圖示、分類已在 `frontend/src/menuConfig.js` 中定義好，開發對應頁面時只需：1) 建立頁面元件、2) 在 `App.jsx` 的 `readyComponents` 對照表加上該路徑對應的元件、3) 將 `menuConfig.js` 該項目加上 `ready: true`。

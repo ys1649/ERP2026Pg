@@ -14,6 +14,13 @@ import JournalList from './pages/JournalList'
 import ArRecvList from './pages/ArRecvList'
 import ApPayList from './pages/ApPayList'
 import InvAdjustList from './pages/InvAdjustList'
+import AssetLiabilityStatement from './pages/AssetLiabilityStatement'
+import IncomeStatement from './pages/IncomeStatement'
+import AccountBalanceStatement from './pages/AccountBalanceStatement'
+import DailyJournal from './pages/DailyJournal'
+import TrialBalance from './pages/TrialBalance'
+import CashBook from './pages/CashBook'
+import DetailLedger from './pages/DetailLedger'
 import DataDictMaster from './pages/DataDictMaster'
 import SysReportMaster from './pages/SysReportMaster'
 import SysReportDesignerPage from './pages/SysReportDesignerPage'
@@ -35,6 +42,13 @@ const readyComponents = {
   '/trade/receivable': ArRecvList,
   '/trade/payable': ApPayList,
   '/trade/misc': InvAdjustList,
+  '/gl/balance-sheet': AssetLiabilityStatement,
+  '/gl/income-statement': IncomeStatement,
+  '/gl/balance': AccountBalanceStatement,
+  '/gl/daily': DailyJournal,
+  '/gl/trial': TrialBalance,
+  '/gl/cash': CashBook,
+  '/gl/detail': DetailLedger,
   '/system/datadict': DataDictMaster,
   '/system/report': SysReportMaster,
   '/system/mssql-migrate': MssqlMigrate,
@@ -46,10 +60,12 @@ export default function App() {
     <Routes>
       <Route element={<MainLayout />}>
         <Route index element={<Home />} />
-        {flatMenuItems.map((item) => {
-          const Component = readyComponents[item.path] || Placeholder
-          return <Route key={item.path} path={item.path} element={<Component />} />
-        })}
+        {flatMenuItems
+          .filter((item) => !item.path.startsWith('/report/view/'))
+          .map((item) => {
+            const Component = readyComponents[item.path] || Placeholder
+            return <Route key={item.path} path={item.path} element={<Component />} />
+          })}
         <Route path="/system/report/design/:srpId" element={<SysReportDesignerPage />} />
         <Route path="/report/view/:srpId" element={<SysReportViewPage />} />
       </Route>
