@@ -39,7 +39,7 @@ LOG_FILE = Path(__file__).resolve().parent / "uvicorn_8000.log"
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(name)s: %(message)s",
-    handlers=[logging.StreamHandler(), NonLockingFileHandler(LOG_FILE, encoding="utf-8")],
+    handlers=[logging.StreamHandler(), NonLockingFileHandler(LOG_FILE, encoding="utf-8", delay=True)],
     force=True,
 )
 

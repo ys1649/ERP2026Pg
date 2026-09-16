@@ -44,28 +44,28 @@ export default function SysReportFormModal({ open, record, onOk, onCancel, loadi
           rules={[{ required: true, message: '必填' }]}
           extra="單一 SELECT 查詢，查詢欄位所在的資料表要給別名，例：SELECT A.* FROM TBL_CUSTOMER A"
         >
-          <TextArea rows={4} maxLength={4000} style={{ fontFamily: 'monospace' }} />
+          <TextArea rows={4} style={{ fontFamily: 'monospace' }} />
         </Form.Item>
         <Form.Item
           name="srp_where"
           label="SRP_WHERE（固定條件，選填）"
           extra="要包含 WHERE 關鍵字本身，例：WHERE A.CUM_NO &lt;&gt; '0000'；查詢欄位的條件會自動用 AND 接在後面"
         >
-          <TextArea rows={2} maxLength={4000} style={{ fontFamily: 'monospace' }} />
+          <TextArea rows={2} style={{ fontFamily: 'monospace' }} />
         </Form.Item>
         <Form.Item
           name="srp_groupby"
           label="SRP_GROUPBY（選填）"
           extra="要包含 GROUP BY 關鍵字本身，例：GROUP BY A.CUM_NO"
         >
-          <TextArea rows={2} maxLength={4000} style={{ fontFamily: 'monospace' }} />
+          <TextArea rows={2} style={{ fontFamily: 'monospace' }} />
         </Form.Item>
         <Form.Item
           name="srp_orderby"
           label="SRP_ORDERBY（預設排序，選填）"
           extra="要包含 ORDER BY 關鍵字本身，例：ORDER BY A.CUM_NO；查詢欄位裡標記排序的欄位會自動接在後面"
         >
-          <TextArea rows={2} maxLength={4000} style={{ fontFamily: 'monospace' }} />
+          <TextArea rows={2} style={{ fontFamily: 'monospace' }} />
         </Form.Item>
       </Form>
     </Modal>

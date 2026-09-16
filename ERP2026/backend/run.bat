@@ -1,4 +1,5 @@
 @echo off
+cd /d %~dp0
 set PORT=8000
 
 for /f "tokens=5" %%p in ('netstat -ano ^| findstr ":%PORT% " ^| findstr "LISTENING"') do (

@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      PostgreSQL 8                                 */
-/* Created on:     2026/9/16 ¤U¤È 01:25:33                        */
+/* Created on:     2026/9/16 ¤U¤È 03:07:37                        */
 /*==============================================================*/
 
 
@@ -74,7 +74,7 @@ drop table TBL_TRANSACTION cascade;
 create table TBLDD (
    DDM_NO               VARCHAR(80)          not null,
    DDM_NAME             VARCHAR(80)          not null,
-   DDM_SQL              VARCHAR(4000)        null,
+   DDM_SQL              TEXT                 null,
    IS_MULTI_SELECTED    CHAR(10)             null,
    RET_VAL_FIELD        VARCHAR(80)          null,
    constraint PK_TBLDD primary key (DDM_NO)
@@ -108,10 +108,10 @@ create table TBLSYSREPORT (
    SRP_CODE             VARCHAR(20)          not null,
    SRP_NAME             VARCHAR(80)          not null,
    SRP_DESCRIPTION      VARCHAR(255)         null,
-   SRP_SELECT           VARCHAR(4000)        not null,
-   SRP_WHERE            VARCHAR(4000)        null,
-   SRP_GROUPBY          VARCHAR(4000)        null,
-   SRP_ORDERBY          VARCHAR(4000)        null,
+   SRP_SELECT           TEXT                 not null,
+   SRP_WHERE            TEXT                 null,
+   SRP_GROUPBY          TEXT                 null,
+   SRP_ORDERBY          TEXT                 null,
    SRP_REPORTFILE       TEXT                 null,
    constraint PK_TBLSYSREPORT primary key (SRP_ID),
    constraint AK_SRP_CODE_TBLSYSRE unique (SRP_CODE)
@@ -134,10 +134,10 @@ create table TBLSYSREPORTFIELD (
    SRF_ISWHERE          BOOL                 not null,
    SRF_ISSORT           BOOL                 not null,
    SRF_SORTDEC          BOOL                 null,
-   SRF_LIST_VALUE       VARCHAR(4000)        null,
-   SRF_LIST_SQL         VARCHAR(4000)        null,
+   SRF_LIST_VALUE       TEXT                 null,
+   SRF_LIST_SQL         TEXT                 null,
    SRF_LIST_RETURNFIELD VARCHAR(80)          null,
-   SRF_LIST_FIELDDISP   VARCHAR(4000)        null,
+   SRF_LIST_FIELDDISP   TEXT                 null,
    constraint PK_TBLSYSREPORTFIELD primary key (SRP_ID, SRF_SEQNO),
    constraint FK_TBLSYSRE_REF_1800_TBLSYSRE foreign key (SRP_ID)
       references TBLSYSREPORT (SRP_ID)
