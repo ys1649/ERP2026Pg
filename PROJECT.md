@@ -1,6 +1,6 @@
 # ERP2026 進銷存系統 — 開發文件
 
-> 最後更新：2026-09-15（會計總帳 7 張報表全數完成，統一改走「專屬 SQL + 借用 Stimulsoft Designer」模式：科目餘額表/日記帳/試算表/現金簿/明細分類帳/損益表/資產負債表；詳見〈已完成功能〉章節）
+> 最後更新：2026-09-16（新增系統模組「報表備份還原」：比照系統備份與還原機制，限定只匯出/還原 TBLSYSREPORT/TBLSYSREPORTFIELD/TBLDD/TBL_DDFIELD 這 4 張報表引擎表；詳見〈已完成功能〉章節）
 >
 > **⚠️ 專案根目錄有 [`CLAUDE.md`](CLAUDE.md)，記錄了這個移植專案最重要的工作原則（完全比照舊系統邏輯，包含已知的怪異行為/bug，不要跨模組自作主張統一或修正）——開始開發任何新功能前一定要先讀。**
 
@@ -109,7 +109,8 @@ ERP2026/
 │       ├── data_dict.py     # 資料字典主檔/欄位 CRUD + Lookup meta/data API
 │       ├── sysreport.py     # 系統報表主檔/欄位 CRUD + 動態查詢引擎（比照 Delphi6ERP 動態組 WHERE/ORDER BY）+ 版面讀寫
 │       ├── mssql_migrate.py # ★「MSSQL 資料轉入 PostgreSQL」網頁功能：使用者輸入 MSSQL 連線資訊，只搬資料不動 DDL，排除 4 張報表引擎表
-│       └── backup.py        # ★「系統備份與還原」：GET /export 用 pg_dump --clean --if-exists 匯出單一 .sql 檔；POST /restore 上傳還原，還原前自動於伺服器留一份安全備份，psql --single-transaction 執行（失敗整個 rollback）
+│       ├── backup.py        # ★「系統備份與還原」：GET /export 用 pg_dump --clean --if-exists 匯出單一 .sql 檔；POST /restore 上傳還原，還原前自動於伺服器留一份安全備份，psql --single-transaction 執行（失敗整個 rollback）
+│       └── report_backup.py # ★「報表備份還原」：同 backup.py 機制，但 pg_dump -t 限定只匯出/還原 TBLSYSREPORT/TBLSYSREPORTFIELD/TBLDD/TBL_DDFIELD 這 4 張表，檔名 SYSREPORTyyyyMMDD_HHMI.sql
 │
 ├── .claude/
 │   └── skills/
@@ -155,7 +156,8 @@ ERP2026/
 │       │   ├── datadict.js      # dataDictApi：主檔/欄位 CRUD、meta、data
 │       │   ├── sysreport.js     # sysReportApi：主檔/欄位 CRUD、selectColumns、fieldLookupData、query-meta、runQuery
 │       │   ├── mssqlMigrate.js  # mssqlMigrateApi：test / run（「MSSQL 資料轉入 PostgreSQL」頁面用）
-│       │   └── backup.js        # backupApi：export（blob 下載）/ restore（multipart 上傳）
+│       │   ├── backup.js        # backupApi：export（blob 下載）/ restore（multipart 上傳）
+│       │   └── reportBackup.js  # reportBackupApi：同 backup.js 結構，改打 /api/report-backup
 │       ├── lib/
 │       │   └── ddLookup.jsx     # ★ DDLookup.getDDLookup(ddmNo)：呼叫式 Promise API，動態掛載/卸載
 │       ├── theme.js             # antd ConfigProvider 的 locale/theme 設定（main.jsx 與 ddLookup.jsx 共用）
@@ -179,7 +181,8 @@ ERP2026/
 │       │   ├── DataDictMaster.jsx   # 資料字典維護頁面（主檔 + 欄位定義）
 │       │   ├── SysReportMaster.jsx  # 系統報表定義維護頁面
 │       │   ├── MssqlMigrate.jsx     # ★「MSSQL 資料轉入 PostgreSQL」頁面（系統設定分類下）
-│       │   └── SystemBackup.jsx     # ★「系統備份與還原」頁面：備份下載 + 拖拉上傳還原（需輸入「確認還原」文字才能送出）
+│       │   ├── SystemBackup.jsx     # ★「系統備份與還原」頁面：備份下載 + 拖拉上傳還原（需輸入「確認還原」文字才能送出）
+│       │   └── ReportBackup.jsx     # ★「報表備份還原」頁面：同 SystemBackup.jsx 結構，限定 4 張報表引擎表
 │       └── components/
 │           ├── CustomerFormModal.jsx      # 新增/編輯客戶 Modal
 │           ├── SupplierFormModal.jsx      # 新增/編輯廠商 Modal
@@ -284,6 +287,17 @@ python migrate_mssql_to_pg.py
 - **還原**：使用者上傳 `.sql` 檔案後，後端會先**自動在伺服器留一份還原前的安全備份**（存到 `backend/scripts/backups/pre_restore_{timestamp}.sql`，沿用舊系統「還原前一定先備份」的慣例），再用 `psql -v ON_ERROR_STOP=1 --single-transaction` 執行上傳的腳本——**整份腳本包在一個交易裡，任何一步失敗就整個 rollback**，修正舊系統還原中途失敗會留下半殘資料庫的問題
 - 前端還原按鈕需輸入指定確認文字（「確認還原」）才能送出，避免誤觸清空資料庫；目前系統尚無登入權限機制，此功能任何人都能觸發，待日後 auth 模組完成後應重新檢視存取保護
 - 已實測驗證：把 `database.py` 的 `DBNAME` 暫時指向一個空白資料庫（`erp2`），對其執行還原後，33 張表、38 個外鍵約束、以及各表筆數（出貨單/客戶/應收帳款/資料字典）皆與來源 `erp` 完全一致，且全程未動到 `erp` 本身的資料
+
+### 報表備份還原（`/system/report-backup` 網頁功能）
+
+備份方法與流程完全比照上面的〈系統備份與還原〉，差別只在**限定只匯出/還原報表引擎相關 4 張表**：`TBLSYSREPORT`／`TBLSYSREPORTFIELD`／`TBLDD`／`TBL_DDFIELD`：
+
+- 後端：`backend/routers/report_backup.py`（`GET /api/report-backup/export`、`POST /api/report-backup/restore`）
+- 前端：`frontend/src/pages/ReportBackup.jsx`（系統設定 → 報表備份還原）
+- **匯出**：`pg_dump -F p --no-owner --no-privileges --clean --if-exists -t tblsysreport -t tblsysreportfield -t tbldd -t tbl_ddfield`，其餘機制（`--clean --if-exists` 帶 `DROP`/`CREATE`）與系統備份相同
+- 檔名格式與系統備份不同：`SYSREPORTyyyyMMDD_HHMI.sql`（例如 `SYSREPORT20260916_1430.sql`），系統備份是 `erp_backup_yyyyMMddHHmmss.sql`
+- **還原**：同樣先在伺服器留一份還原前安全備份（`backend/scripts/backups/pre_report_restore_{yyyyMMdd_HHMI}.sql`），再用 `psql --single-transaction` 執行，失敗整個 rollback；前端還原按鈕同樣需輸入「確認還原」才能送出
+- 用途：報表定義（`TBLSYSREPORT`/`TBLSYSREPORTFIELD`）與資料字典（`TBLDD`/`TBL_DDFIELD`）常需要獨立備份/搬移，不用每次都動到整個資料庫
 
 ### 匯入系統報表定義（`.claude/skills/import-sysreport`）
 
@@ -419,6 +433,13 @@ python -m uvicorn main:app --reload --port 8000
 | GET | `/api/backup/export` | 用 `pg_dump` 匯出整個資料庫為單一 `.sql` 檔並下載 |
 | POST | `/api/backup/restore` | 上傳 `.sql` 備份檔還原；還原前自動於伺服器留一份安全備份，`psql --single-transaction` 執行 |
 
+#### 報表備份還原（`/api/report-backup`，見〈資料庫〉章節）
+
+| Method | 路徑 | 說明 |
+|--------|------|------|
+| GET | `/api/report-backup/export` | 用 `pg_dump -t` 限定只匯出 TBLSYSREPORT/TBLSYSREPORTFIELD/TBLDD/TBL_DDFIELD 這 4 張表為單一 `.sql` 檔並下載，檔名 `SYSREPORTyyyyMMDD_HHMI.sql` |
+| POST | `/api/report-backup/restore` | 上傳 `.sql` 備份檔還原這 4 張表；還原前自動於伺服器留一份安全備份，`psql --single-transaction` 執行 |
+
 ### 查詢參數（GET /api/customers）
 
 | 參數 | 說明 |
@@ -471,6 +492,8 @@ proxy: { '/api': { target: 'http://localhost:8000', changeOrigin: true } }
 | `api/mssqlMigrate.js` | mssqlMigrateApi（test / run，5 分鐘 timeout） |
 | `pages/SystemBackup.jsx` | 「系統備份與還原」頁面：備份下載按鈕、拖拉上傳＋輸入確認文字才能執行的還原按鈕 |
 | `api/backup.js` | backupApi（export 回傳 blob 觸發下載 / restore 用 multipart 上傳） |
+| `pages/ReportBackup.jsx` | 「報表備份還原」頁面：同 SystemBackup.jsx 結構，限定只備份/還原 4 張報表引擎表 |
+| `api/reportBackup.js` | reportBackupApi（export / restore，結構同 backupApi，改打 `/api/report-backup`） |
 
 ---
 
@@ -830,6 +853,7 @@ npm install
   - [x] 前端還原按鈕需輸入「確認還原」文字才能送出
   - 已知限制：系統尚無登入權限機制，此功能任何人都能觸發，待 auth 模組完成後應重新檢視存取保護
   - **實測**：對一個空白資料庫（`erp2`）執行還原，33 張表／38 個外鍵約束／各表筆數皆與來源 `erp` 完全一致，且未動到 `erp` 本身資料
+- [x] 報表備份還原（`/system/report-backup`，詳見〈資料庫〉章節）——同〈系統備份與還原〉的機制，但 `pg_dump -t` 限定只匯出/還原 `TBLSYSREPORT`/`TBLSYSREPORTFIELD`/`TBLDD`/`TBL_DDFIELD` 這 4 張報表引擎表，檔名格式改為 `SYSREPORTyyyyMMDD_HHMI.sql`
 - [x] 進貨單（進貨/退出）維護——比照 Delphi6ERP `Form_PoRecv.pas`，結構跟 SHIP 幾乎完全對稱但有幾個關鍵差異，逐一讀碼確認、不是直接假設對稱
   - [x] 畫面/彈窗模式、確認/取消確認、資料字典多選新增品項、單號產生規則都與 SHIP 相同
   - [x] **廠商歷史單價查詢無後備值**：`GetSupHisPrice` 查無該廠商該產品的歷史進貨紀錄時回傳 0，不像 SHIP 的 `GetCusHisPrice` 會退回產品標準售價——這是比照舊系統原樣的差異，不是漏做
@@ -910,7 +934,7 @@ npm install
 - [ ] **成本作業**（`cost` 分類）：
   - 庫存交易重整（`ResetInvTransaction`）：舊系統是「整個 `TBL_TRANSACTION` 先 DELETE 再依來源單據重建」且**沒有交易包裹、沒有確認對話框**的高風險工具，全庫無條件重算、不能只挑單一產品或日期區間；值不值得做成網頁功能還是改用後端 script/CLI 處理，要先問過使用者
   - `menuConfig.js` 目前的 `cost-period`「期間維護」在舊系統模組清單裡找不到對應項目，用途不明，需要跟使用者確認這是新規劃還是筆誤
-- [ ] **系統模組其餘項目**（`system` 分類；系統備份與還原已完成，見〈已完成功能〉）：
+- [ ] **系統模組其餘項目**（`system` 分類；系統備份與還原、報表備份還原已完成，見〈已完成功能〉）：
   - 會計年度結轉（`ACNT_CHANGE_YEAR`）：舊系統**完全沒有任何前置檢查**（不檢查借貸平衡、未過帳單據），純靠使用者按一次確認對話框，且損益科目餘額轉入權益時寫死科目代號 `3351`；這是高風險的批次操作，動工前要先確認要不要維持這種「零檢查」的原樣行為
   - 系統設定（`SYS_PARAM`）：舊系統畫面只給使用者編輯 10 個欄位（公司資訊/稅率/備份路徑等），會計年度、11 個自動過帳科目代號、小數位數設定完全沒有 UI 可以改，只能後台直接操作 DB 或靠專屬模組——是否要原樣保留這個限制，還是趁機補齊管理介面，要先確認
   - 功能權限管理：使用者已明確表示這次移植範圍不含（舊系統本來就只有登入沒有細部權限）

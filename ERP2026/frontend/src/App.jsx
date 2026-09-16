@@ -27,6 +27,7 @@ import SysReportDesignerPage from './pages/SysReportDesignerPage'
 import SysReportViewPage from './pages/SysReportViewPage'
 import MssqlMigrate from './pages/MssqlMigrate'
 import SystemBackup from './pages/SystemBackup'
+import ReportBackup from './pages/ReportBackup'
 import { flatMenuItems } from './menuConfig'
 
 const readyComponents = {
@@ -53,6 +54,7 @@ const readyComponents = {
   '/system/report': SysReportMaster,
   '/system/mssql-migrate': MssqlMigrate,
   '/system/backup': SystemBackup,
+  '/system/report-backup': ReportBackup,
 }
 
 export default function App() {

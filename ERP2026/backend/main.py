@@ -22,6 +22,7 @@ from routers import (
     acnt_journal,
     gl_reports,
     backup,
+    report_backup,
 )
 
 class NonLockingFileHandler(logging.FileHandler):
@@ -70,6 +71,7 @@ app.include_router(inv_adjust.router, prefix="/api/inv-adjust", tags=["inv-adjus
 app.include_router(gl_reports.router, prefix="/api/gl-reports", tags=["gl-reports"])
 app.include_router(acnt_journal.router, prefix="/api/acnt-journal", tags=["acnt-journal"])
 app.include_router(backup.router, prefix="/api/backup", tags=["backup"])
+app.include_router(report_backup.router, prefix="/api/report-backup", tags=["report-backup"])
 
 if __name__ == "__main__":
     import uvicorn
