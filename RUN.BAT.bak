@@ -1,0 +1,2 @@
+cmd /K ERP2026\backend\run.bat
+cmd /K ERP2026\frontend\Run.bat
